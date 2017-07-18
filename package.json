@@ -1,0 +1,26 @@
+{
+  "name": "360connect-js-sdk",
+  "description": "360Connection JS SDK",
+  "version": "0.0.1",
+  "private": true,
+  "license": "Apache-2.0",
+  "author": "Romain Bruckert",
+  "engines": {
+    "node": ">=4.3.2"
+  },
+  "scripts": {
+    "start": "",
+    "build": "webpack",
+    "watch": "npm run copy:assets && webpack",
+    "copy:assets": "bash build.sh"
+  },
+  "dependencies": {
+    "ajax-request": "^1.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.8",
+    "json-loader": "^0.5.4",
+    "ts-loader": "^2.3.0",
+    "typescript": "^2.3.2"
+  }
+}
