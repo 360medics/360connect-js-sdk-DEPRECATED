@@ -13,6 +13,11 @@ export class ErrorResponse
         }
     }
     
+    has(prop: string)
+    {
+        return this[prop] !== 'undefined' ? true : false;
+    }
+
     isSuccessful()
     {
         return (this.error == null) ? true : false;

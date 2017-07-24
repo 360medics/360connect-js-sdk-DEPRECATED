@@ -1,7 +1,6 @@
 {
-    "oauth": {
+    "api": {
         "PROTOCOL": "http",
         "DOMAIN": "360medical.dev"
     }
-    
 }

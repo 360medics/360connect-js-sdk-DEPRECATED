@@ -13,7 +13,8 @@ module.exports = {
         loaders: [
             // all files with a '.ts' or '.tsx' extension will be handled by 'ts-loader'
             { test: /\.tsx?$/, loader: 'ts-loader' },
-            { test: /\.json$/, loader: 'json-loader' },
+            { test: /\.txt$/, loader: 'raw-loader' },
+            { test: /\.json$/, loader: 'json-loader' }
         ]
     },
     watch: true,
