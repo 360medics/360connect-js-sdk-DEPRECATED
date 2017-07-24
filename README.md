@@ -1,9 +1,7 @@
 # OAuth 360 Connect JS SDK
 
-![Login Button](test/docs/login-button-loggedout.png)
-
-<div style="center">
-<img src="test/docs/login-button-loggedout.png" height="54" alt="360connect login button">
+<div style="text-align:center">
+<img src="test/docs/login-button-loggedout.png" height="52" alt="360connect login button">
 </div>
 
 ## Getting started on the web
@@ -47,11 +45,7 @@ Connect.OAuth()
 
 ### Showing the login button
 
-Show the login button (featuring user status) somewhere in your HTML.
-
-<div style="text-align:center">
-![Login Button](test/docs/login-button-loggedout.png)
-</div>
+Show the login button (featuring user status) somewhere in your HTML <img src="test/docs/login-button-loggedout.png" height="14" alt="360connect login button" style="display:inline-block">.
 
 ```html
 <login-button></login-button>
