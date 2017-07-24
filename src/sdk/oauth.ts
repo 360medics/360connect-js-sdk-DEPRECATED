@@ -214,7 +214,7 @@ export class OAuth
         const event = new CustomEvent('status:change', { detail: { status: status, user: this.getUser() } });
         window.dispatchEvent(event);
     }
-    
+
     requestAuthorizationCode(params: OAuthParameters)
     {
         params.grant_type = 'authorization_code';
@@ -222,7 +222,7 @@ export class OAuth
         params.clientSecret = this.clientConfig.clientSecret;
 
         this.require(['scope']);
-        const url = this.endpoint(OAuth.TOKEN_PATH, params);
+        const url = this.endpoint(OAuth.TOKEN_PATH, params)+'a';
         this.dispatchStatusChangeEvent('loading');
 
         Local.erase('authorizationTokens');

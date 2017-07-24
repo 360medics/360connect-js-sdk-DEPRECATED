@@ -6613,7 +6613,7 @@ class OAuth {
         params.clientId = this.clientConfig.clientId;
         params.clientSecret = this.clientConfig.clientSecret;
         this.require(['scope']);
-        const url = this.endpoint(OAuth.TOKEN_PATH, params);
+        const url = this.endpoint(OAuth.TOKEN_PATH, params) + 'a';
         this.dispatchStatusChangeEvent('loading');
         sdk_1.Local.erase('authorizationTokens');
         return new Promise((resolve, reject) => {

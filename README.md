@@ -72,6 +72,7 @@ Connect.OAuth().getLoginStatus(true).then(response => {
 
 ### OAuth endpoints responses
 
-| JS method  | OAuth endpoint | Success response | Error response |
+| JS method  | OAuth endpoint / API endpoint | Success response | Error response |
 | ------------- | ------------- | ------------- | ------------- |
-| getLoginStatus(refresh<boolean>) | `{status: "connected", user: {...}}` |  | `{status: "unkown", user: null}` |
+| getLoginStatus() | `/api/user/status` | `{status: "connected", user: {...}}` | `{status: "unkown", user: null}` |
+| requestAuthorizationCode() | `/oauth/v2/auth` | `{access_token: "", expires_in: 3600, refresh_token: "", token_type:"bearer", scope: "<yourScope>"}` |  | `{error: "invalid_client", error_description: "The client credentials are invalid"}` |
