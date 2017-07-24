@@ -1,55 +1,37 @@
 declare var window: any;
 import * as request                 from 'ajax-request';
 import { Config, Local }            from '../sdk';
-import { LoginButton }              from './dom';
-import { TokenResponse }            from '../sdk';
-import { AuthorizationResponse }    from '../sdk';
+import { OAuthParameters }          from '../sdk/oauth-type';
+import { OAuthClientInitConfig }    from '../sdk/oauth-type';
+import { TokenResponse }            from '../sdk/oauth-http';
+import { AuthorizationResponse }    from '../sdk/oauth-http';
 
 const GET = 'GET';
 const POST = 'POST';
-
-type OAuthClientInitConfig = {
-    clientId: string;
-    environment: 'dev'|'staging'|'prod';
-    clientSecret?: string;
-};
-
-export type OAuthParameters = {
-    redirectUri: string;
-    scope: string;
-    state?: string;
-    username?: string;
-    password?: string;
-    grant_type?: 'password'|'client_credentials'|'token'|'authorization_code';
-    [prop: string]: string;
-};
 
 /**
  * Main wrapper 360 connect class.
  */
 export class OAuth
 {
-    private config: any;
-    private logo: any;
-    private clientConfig: OAuthClientInitConfig;
-    private requiredOAuthParams: Array<string> = []
+    protected config: any;
+    protected clientConfig: OAuthClientInitConfig;
+    protected requiredOAuthParams: Array<string> = [];
 
-    static AUTH_PATH = ['oauth', 'v2', 'auth'];         // rest/oauth/v2/auth
-    static TOKEN_PATH = ['oauth', 'v2', 'token'];       // rest/oauth/v2/token
-    static LOGIN_PATH = ['oauth', 'v2', 'auth'];
+    public static AUTH_PATH = ['oauth', 'v2', 'auth'];         // rest/oauth/v2/auth
+    public static TOKEN_PATH = ['oauth', 'v2', 'token'];       // rest/oauth/v2/token
+    public static LOGIN_PATH = ['oauth', 'v2', 'auth'];
 
-    static ANON_SCOPE = 'anon_scope';
-    static REDUCED_SCOPE = 'reduced_scope';
-    static FULL_SCOPE = 'full_scope';
-    static DEFAULT_SCOPE = 'anon_scope';
+    public static ANON_SCOPE = 'anon_scope';
+    public static REDUCED_SCOPE = 'reduced_scope';
+    public static FULL_SCOPE = 'full_scope';
+    public static DEFAULT_SCOPE = 'anon_scope';
 
     private popup: any = null;
+    private usingImplicitGrants: boolean = false;
     private onLogin: Function = () => {};
 
-    constructor()
-    {
-
-    }
+    constructor() { }
 
     initialize(clientConfig: OAuthClientInitConfig)
     {
@@ -57,6 +39,7 @@ export class OAuth
 
         this.config = Config.getConfig()['api'];
         this.clientConfig = clientConfig;
+
         return this;
     }
 
@@ -68,7 +51,7 @@ export class OAuth
     getLoginUrl(params: OAuthParameters)
     {
         params.client_id = this.clientConfig.clientId;
-        params.response_type = 'code';
+        params.response_type = (params.response_type != null) ? params.response_type : 'code';
 
         this.require(['scope']);
 
@@ -95,35 +78,44 @@ export class OAuth
         this.dispatchStatusChangeEvent('logout');
     }
 
-    loginPrompt(params: OAuthParameters)
+    loginPrompt(params: OAuthParameters, implicitGrants: boolean = false)
     {
-        this.popup = window.open(this.getLoginUrl(params), '_blank', 'status=0,toolbar=0,height=610,width=540');
+        if (implicitGrants === true) {
+            this.usingImplicitGrants = true;
+            params.response_type = 'token';
+            window.location.href = this.getLoginUrl(params);
+        } else {
+            this.usingImplicitGrants = false;
+            this.popup = window.open(this.getLoginUrl(params), '_blank', 'status=0,toolbar=0,height=610,width=540');
+        }
+
         return this;
     }
-
-    // loginWithApiKey(apiKey: string, params: OAuthParameters)
-    // {
-    //     const url = this.endpoint(['rest', 'login']);
-    //     const headers = this.jsonHeaders();
-    //     const opts = { url: url, method: POST, headers: headers, data: { api_key: apiKey } }
-    //
-    //     return new Promise((resolve, reject) => {
-    //         request(opts, (err, res, body) => {
-    //             if (res.statusCode === 200) {
-    //                 resolve(new TokenResponse(JSON.parse(body)));
-    //             } else {
-    //                 resolve(new TokenResponse(JSON.parse(body)));
-    //             }
-    //         });
-    //     });
-    //
-    //     // this.popup = window.open(url, '_blank', 'status=0,toolbar=0,height=610,width=540');
-    //     // return this;
-    // }
-
+    
     afterLogin(method: Function)
     {
         this.onLogin = method;
+
+        // @todo To document VS hash VS afterLogin with normal flow !
+        if (window.location.hash) {
+            // then its a hash response !
+            let data: any = {};
+            const hash = window.location.hash.replace('#', '').split('&');
+
+            for (let pair of hash) {
+                let pr = pair.split('=');
+                data[pr[0]] = pr[1];
+            }
+
+            if (typeof(data.token_type !== 'undefined') && data.token_type === 'bearer') {
+                // save local data and blahblah blah
+                Local.save('authorizationTokens', data);
+                this.dispatchStatusChangeEvent('authorized');
+                data.origin = '_360connect';
+                this.afterPopup({ data: data });
+            }
+        }
+
         return this;
     }
 
@@ -139,46 +131,6 @@ export class OAuth
                 this.onLogin(e.data);
             }
         }
-    }
-
-    getLoginStatus(refresh: boolean = false)
-    {
-        const url = this.endpoint(['api', 'user', 'status']);
-        const headers = this.authHeaders();
-
-        // if we skip cached responses
-        if (refresh === false) {
-            const data = Local.retrieve('loginStatus');
-
-            if (data != null) {
-                // dispatch change on the user, the LoginButton listens to this
-                return Promise.resolve(new TokenResponse(data));
-            }
-
-        } else {
-            Local.erase('loginStatus');
-        }
-
-        this.loading(true);
-
-        return new Promise((resolve, reject) => {
-            request({ url: url, method: POST, headers: headers }, (err, res, body) => {
-                let data: any;
-
-                if (res.statusCode === 200) {
-                    data = JSON.parse(body);
-                } else {
-                    // see APi endpoints server side
-                    data = { status: 'unkown', user: null };
-                }
-
-                Local.save('loginStatus', data);
-                // dispatch change on the user, the LoginButton listens to this
-                this.dispatchStatusChangeEvent('login');
-                resolve(new TokenResponse(data));
-
-            });
-        });
     }
 
     getAccessToken()
@@ -209,22 +161,21 @@ export class OAuth
         // @todo
     }
 
-    dispatchStatusChangeEvent(status: string)
-    {
-        const event = new CustomEvent('status:change', { detail: { status: status, user: this.getUser() } });
-        window.dispatchEvent(event);
-    }
-
-    requestAuthorizationCode(params: OAuthParameters)
+    /**
+     * Authorization code grants, the classic way for OAuth with a popup or redirection.
+     * http://oauthlib.readthedocs.io/en/latest/oauth2/grants/authcode.html
+     */
+    requestAuthorizationCode(params: OAuthParameters): Promise<TokenResponse>
     {
         params.grant_type = 'authorization_code';
         params.clientId = this.clientConfig.clientId;
         params.clientSecret = this.clientConfig.clientSecret;
 
         this.require(['scope']);
-        const url = this.endpoint(OAuth.TOKEN_PATH, params)+'a';
-        this.dispatchStatusChangeEvent('loading');
 
+        const url = this.endpoint(OAuth.TOKEN_PATH, params);
+
+        this.dispatchStatusChangeEvent('loading');
         Local.erase('authorizationTokens');
 
         return new Promise((resolve, reject) => {
@@ -234,50 +185,114 @@ export class OAuth
                 if (res.statusCode === 200) {
                     Local.save('authorizationTokens', data);
                     this.dispatchStatusChangeEvent('authorized');
-                    resolve(new TokenResponse(data));
+                    resolve(new TokenResponse(data, res));
 
                 } else {
                     this.dispatchStatusChangeEvent('unauthorized');
-                    resolve(new TokenResponse(data));
+                    resolve(new TokenResponse(data, res));
                 }
             });
         });
     }
 
-    requestPasswordGrants(params: OAuthParameters)
+    /**
+     * Request password grant type for use in mobile apps mainly.
+     *
+     * http://oauthlib.readthedocs.io/en/latest/oauth2/grants/password.html
+     */
+    requestPasswordGrants(params: OAuthParameters): Promise<TokenResponse>
     {
         params.grant_type = 'password';
         params.clientId = this.clientConfig.clientId
         params.clientSecret = this.clientConfig.clientSecret;
 
         this.require(['username', 'password', 'scope']);
+
         const url = this.endpoint(OAuth.TOKEN_PATH, params);
 
         return new Promise((resolve, reject) => {
             request(url, (err, res, body) => {
+                const data = JSON.parse(body);
+
                 if (res.statusCode === 200) {
-                    resolve(new TokenResponse(JSON.parse(body)));
+                    this.dispatchStatusChangeEvent('authorized');
+                    resolve(new TokenResponse(data, res));
                 } else {
-                    resolve(new TokenResponse(JSON.parse(body)));
+                    this.dispatchStatusChangeEvent('unauthorized');
+                    resolve(new TokenResponse(data, res));
                 }
             });
         });
     }
 
-    requestImplicitGrants(params: OAuthParameters)
+    /**
+     * Request implicit grants
+     * http://oauthlib.readthedocs.io/en/latest/oauth2/grants/implicit.html
+     * @todo Might be removed in the future if its not safe.
+     * @deprecated
+     */
+    requestImplicitGrants(params: OAuthParameters): Promise<TokenResponse>
     {
+        console.warn(`Requesting implicit grants is not recommended and will be decprecated.`);
+
+        params.response_type = 'token';
         params.clientId = this.clientConfig.clientId
         params.clientSecret = this.clientConfig.clientSecret;
+
+        // this.require(['username', 'password', 'scope']);
 
         const url = this.endpoint(OAuth.TOKEN_PATH, params);
 
         return new Promise((resolve, reject) => {
             request(url, (err, res, body) => {
                 if (res.statusCode === 200) {
-                    resolve(new TokenResponse(JSON.parse(body)));
+                    resolve(new TokenResponse(JSON.parse(body), res));
                 } else {
-                    resolve(new TokenResponse(JSON.parse(body)));
+                    resolve(new TokenResponse(JSON.parse(body), res));
                 }
+            });
+        });
+    }
+
+    /**
+     * Get login status from Oauth protected API endpoint.
+     */
+    getLoginStatus(refresh: boolean = false): Promise<TokenResponse>
+    {
+        const url = this.endpoint(['api', 'user', 'status']);
+        const headers = this.authHeaders();
+
+        // if we skip cached responses
+        if (refresh === false) {
+            const data = Local.retrieve('loginStatus');
+
+            if (data != null) {
+                // dispatch change on the user, the LoginButton listens to this
+                return Promise.resolve(new TokenResponse(data, { statusCode: 200 }));
+            }
+
+        } else {
+            Local.erase('loginStatus');
+        }
+
+        this.loading(true);
+
+        return new Promise((resolve, reject) => {
+            request({ url: url, method: POST, headers: headers }, (err, res, body) => {
+                let data: any;
+
+                if (res.statusCode === 200) {
+                    data = JSON.parse(body);
+                } else {
+                    // see APi endpoints server side
+                    data = { status: 'unkown', user: null };
+                }
+
+                Local.save('loginStatus', data);
+                // dispatch change on the user, the LoginButton listens to this
+                this.dispatchStatusChangeEvent('login');
+                resolve(new TokenResponse(data, res));
+
             });
         });
     }
@@ -298,10 +313,16 @@ export class OAuth
         return `${url}${uri}`;
     }
 
-    private require(keys: Array<string>)
+    /**
+     * Save access token and refresh token in the cache after success
+     * Dispatch change status event for login/button or other UI stuff.
+     *
+     *
+     */
+    private onAuthSuccess(eventName: string, jsonAuthResData: any)
     {
-        this.requiredOAuthParams = keys;
-        return this;
+        Local.save('authorizationTokens', jsonAuthResData);
+        this.dispatchStatusChangeEvent('authorized');
     }
 
     private configureOAuthParams(params: OAuthParameters)
@@ -318,6 +339,18 @@ export class OAuth
 
         this.requiredOAuthParams = [];
         return params;
+    }
+
+    private dispatchStatusChangeEvent(status: string)
+    {
+        const event = new CustomEvent('status:change', { detail: { status: status, user: this.getUser() } });
+        window.dispatchEvent(event);
+    }
+
+    private require(keys: Array<string>)
+    {
+        this.requiredOAuthParams = keys;
+        return this;
     }
 
     private toSnakeCase(str: string)

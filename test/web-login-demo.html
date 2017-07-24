@@ -42,12 +42,11 @@
         Connect.OAuth().afterLogin(function(data) {
             // console.log(data.code, data.state);
             Connect.OAuth().requestAuthorizationCode({ code: data.code, redirectUri: REDIRECT_URI, scope: SCOPE }).then(function(response) {
-                console.log(response);
                 // console.log(Connect.OAuth().getAccessToken());
                 Connect.OAuth().getLoginStatus(true).then(response => {
                     console.log(response);
                 });
-                
+
             });
         });
 
@@ -61,7 +60,7 @@
             });
 
             // first check user logged in status
-            Connect.OAuth().getLoginStatus(true).then(response => {
+            Connect.OAuth().getLoginStatus().then(response => {
                 console.log(response);
                 // console.log(Connect.OAuth().getAccessToken());
 

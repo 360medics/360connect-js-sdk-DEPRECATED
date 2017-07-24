@@ -1,7 +1,5 @@
-import { Connect, OAuth }           from './sdk';
-import { TokenResponse }            from './sdk';
-import { AuthorizationResponse }    from './sdk';
-import { LoginButton }              from './sdk/dom';
+import { Connect, OAuth }   from './sdk';
+import { LoginButton }      from './sdk/dom';
 
 const connect = new Connect();
 declare var window: any;

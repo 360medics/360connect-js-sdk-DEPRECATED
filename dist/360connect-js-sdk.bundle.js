@@ -296,8 +296,8 @@ process.umask = function() { return 0; };
 
 
 
-var base64 = __webpack_require__(33)
-var ieee754 = __webpack_require__(34)
+var base64 = __webpack_require__(32)
+var ieee754 = __webpack_require__(33)
 var isArray = __webpack_require__(10)
 
 exports.Buffer = Buffer
@@ -2157,7 +2157,7 @@ var objectKeys = Object.keys || function (obj) {
 module.exports = Duplex;
 
 /*<replacement>*/
-var util = __webpack_require__(6);
+var util = __webpack_require__(5);
 util.inherits = __webpack_require__(3);
 /*</replacement>*/
 
@@ -2239,23 +2239,6 @@ function forEach(xs, f) {
 
 /***/ }),
 /* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(24));
-__export(__webpack_require__(29));
-__export(__webpack_require__(30));
-__export(__webpack_require__(31));
-__export(__webpack_require__(58));
-
-
-/***/ }),
-/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
@@ -2367,6 +2350,22 @@ function objectToString(o) {
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2).Buffer))
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+__export(__webpack_require__(24));
+__export(__webpack_require__(29));
+__export(__webpack_require__(30));
+__export(__webpack_require__(59));
+
 
 /***/ }),
 /* 7 */
@@ -2495,7 +2494,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
  * @fileoverview Extend node util module
  * @author douzi <liaowei08@gmail.com> 
  */
-var util = __webpack_require__(52);
+var util = __webpack_require__(51);
 var toString = Object.prototype.toString;
 var isWindows = process.platform === 'win32';
 
@@ -2768,7 +2767,7 @@ exports.Readable = exports;
 exports.Writable = __webpack_require__(17);
 exports.Duplex = __webpack_require__(4);
 exports.Transform = __webpack_require__(19);
-exports.PassThrough = __webpack_require__(43);
+exports.PassThrough = __webpack_require__(42);
 
 
 /***/ }),
@@ -2842,12 +2841,12 @@ function _isUint8Array(obj) {
 /*</replacement>*/
 
 /*<replacement>*/
-var util = __webpack_require__(6);
+var util = __webpack_require__(5);
 util.inherits = __webpack_require__(3);
 /*</replacement>*/
 
 /*<replacement>*/
-var debugUtil = __webpack_require__(38);
+var debugUtil = __webpack_require__(37);
 var debug = void 0;
 if (debugUtil && debugUtil.debuglog) {
   debug = debugUtil.debuglog('stream');
@@ -2856,7 +2855,7 @@ if (debugUtil && debugUtil.debuglog) {
 }
 /*</replacement>*/
 
-var BufferList = __webpack_require__(39);
+var BufferList = __webpack_require__(38);
 var destroyImpl = __webpack_require__(16);
 var StringDecoder;
 
@@ -4249,13 +4248,13 @@ var Duplex;
 Writable.WritableState = WritableState;
 
 /*<replacement>*/
-var util = __webpack_require__(6);
+var util = __webpack_require__(5);
 util.inherits = __webpack_require__(3);
 /*</replacement>*/
 
 /*<replacement>*/
 var internalUtil = {
-  deprecate: __webpack_require__(42)
+  deprecate: __webpack_require__(41)
 };
 /*</replacement>*/
 
@@ -4847,7 +4846,7 @@ Writable.prototype._destroy = function (err, cb) {
   this.end();
   cb(err);
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(40).setImmediate, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(39).setImmediate, __webpack_require__(0)))
 
 /***/ }),
 /* 18 */
@@ -5151,7 +5150,7 @@ module.exports = Transform;
 var Duplex = __webpack_require__(4);
 
 /*<replacement>*/
-var util = __webpack_require__(6);
+var util = __webpack_require__(5);
 util.inherits = __webpack_require__(3);
 /*</replacement>*/
 
@@ -5324,8 +5323,8 @@ function done(stream, er, data) {
 
 
 
-var punycode = __webpack_require__(47);
-var util = __webpack_require__(49);
+var punycode = __webpack_require__(46);
+var util = __webpack_require__(48);
 
 exports.parse = urlParse;
 exports.resolve = urlResolve;
@@ -6042,8 +6041,8 @@ Url.prototype.parseHost = function() {
 "use strict";
 
 
-exports.decode = exports.parse = __webpack_require__(50);
-exports.encode = exports.stringify = __webpack_require__(51);
+exports.decode = exports.parse = __webpack_require__(49);
+exports.encode = exports.stringify = __webpack_require__(50);
 
 
 /***/ }),
@@ -6284,8 +6283,8 @@ var substr = 'ab'.substr(-1) === 'b'
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const sdk_1 = __webpack_require__(5);
-const dom_1 = __webpack_require__(59);
+const sdk_1 = __webpack_require__(6);
+const dom_1 = __webpack_require__(60);
 const connect = new sdk_1.Connect();
 // create custom shadow DOM elements
 // customElements.define('x-foo', XFooDOMElement);
@@ -6436,46 +6435,9 @@ exports.Local = new LocalModule();
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-class ErrorResponse {
-    constructor(data) {
-        for (let prop in data) {
-            if (data.hasOwnProperty(prop)) {
-                this[prop] = data[prop];
-            }
-        }
-    }
-    has(prop) {
-        return this[prop] !== 'undefined' ? true : false;
-    }
-    isSuccessful() {
-        return (this.error == null) ? true : false;
-    }
-}
-exports.ErrorResponse = ErrorResponse;
-class TokenResponse extends ErrorResponse {
-    constructor(data) {
-        super(data);
-    }
-}
-exports.TokenResponse = TokenResponse;
-class AuthorizationResponse extends ErrorResponse {
-    constructor(data) {
-        super(data);
-    }
-}
-exports.AuthorizationResponse = AuthorizationResponse;
-
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const request = __webpack_require__(32);
-const sdk_1 = __webpack_require__(5);
-const sdk_2 = __webpack_require__(5);
+const request = __webpack_require__(31);
+const sdk_1 = __webpack_require__(6);
+const oauth_http_1 = __webpack_require__(57);
 const GET = 'GET';
 const POST = 'POST';
 /**
@@ -6485,6 +6447,7 @@ class OAuth {
     constructor() {
         this.requiredOAuthParams = [];
         this.popup = null;
+        this.usingImplicitGrants = false;
         this.onLogin = () => { };
     }
     initialize(clientConfig) {
@@ -6498,7 +6461,7 @@ class OAuth {
     }
     getLoginUrl(params) {
         params.client_id = this.clientConfig.clientId;
-        params.response_type = 'code';
+        params.response_type = (params.response_type != null) ? params.response_type : 'code';
         this.require(['scope']);
         const loginUrl = this.endpoint(OAuth.LOGIN_PATH, params);
         return loginUrl;
@@ -6516,31 +6479,37 @@ class OAuth {
         sdk_1.Local.erase('authorizationTokens');
         this.dispatchStatusChangeEvent('logout');
     }
-    loginPrompt(params) {
-        this.popup = window.open(this.getLoginUrl(params), '_blank', 'status=0,toolbar=0,height=610,width=540');
+    loginPrompt(params, implicitGrants = false) {
+        if (implicitGrants === true) {
+            this.usingImplicitGrants = true;
+            params.response_type = 'token';
+            window.location.href = this.getLoginUrl(params);
+        }
+        else {
+            this.usingImplicitGrants = false;
+            this.popup = window.open(this.getLoginUrl(params), '_blank', 'status=0,toolbar=0,height=610,width=540');
+        }
         return this;
     }
-    // loginWithApiKey(apiKey: string, params: OAuthParameters)
-    // {
-    //     const url = this.endpoint(['rest', 'login']);
-    //     const headers = this.jsonHeaders();
-    //     const opts = { url: url, method: POST, headers: headers, data: { api_key: apiKey } }
-    //
-    //     return new Promise((resolve, reject) => {
-    //         request(opts, (err, res, body) => {
-    //             if (res.statusCode === 200) {
-    //                 resolve(new TokenResponse(JSON.parse(body)));
-    //             } else {
-    //                 resolve(new TokenResponse(JSON.parse(body)));
-    //             }
-    //         });
-    //     });
-    //
-    //     // this.popup = window.open(url, '_blank', 'status=0,toolbar=0,height=610,width=540');
-    //     // return this;
-    // }
     afterLogin(method) {
         this.onLogin = method;
+        // @todo To document VS hash VS afterLogin with normal flow !
+        if (window.location.hash) {
+            // then its a hash response !
+            let data = {};
+            const hash = window.location.hash.replace('#', '').split('&');
+            for (let pair of hash) {
+                let pr = pair.split('=');
+                data[pr[0]] = pr[1];
+            }
+            if (typeof (data.token_type !== 'undefined') && data.token_type === 'bearer') {
+                // save local data and blahblah blah
+                sdk_1.Local.save('authorizationTokens', data);
+                this.dispatchStatusChangeEvent('authorized');
+                data.origin = '_360connect';
+                this.afterPopup({ data: data });
+            }
+        }
         return this;
     }
     afterPopup(e) {
@@ -6553,38 +6522,6 @@ class OAuth {
                 this.onLogin(e.data);
             }
         }
-    }
-    getLoginStatus(refresh = false) {
-        const url = this.endpoint(['api', 'user', 'status']);
-        const headers = this.authHeaders();
-        // if we skip cached responses
-        if (refresh === false) {
-            const data = sdk_1.Local.retrieve('loginStatus');
-            if (data != null) {
-                // dispatch change on the user, the LoginButton listens to this
-                return Promise.resolve(new sdk_2.TokenResponse(data));
-            }
-        }
-        else {
-            sdk_1.Local.erase('loginStatus');
-        }
-        this.loading(true);
-        return new Promise((resolve, reject) => {
-            request({ url: url, method: POST, headers: headers }, (err, res, body) => {
-                let data;
-                if (res.statusCode === 200) {
-                    data = JSON.parse(body);
-                }
-                else {
-                    // see APi endpoints server side
-                    data = { status: 'unkown', user: null };
-                }
-                sdk_1.Local.save('loginStatus', data);
-                // dispatch change on the user, the LoginButton listens to this
-                this.dispatchStatusChangeEvent('login');
-                resolve(new sdk_2.TokenResponse(data));
-            });
-        });
     }
     getAccessToken() {
         const data = sdk_1.Local.retrieve('authorizationTokens');
@@ -6604,16 +6541,16 @@ class OAuth {
     setRefreshToken(token) {
         // @todo
     }
-    dispatchStatusChangeEvent(status) {
-        const event = new CustomEvent('status:change', { detail: { status: status, user: this.getUser() } });
-        window.dispatchEvent(event);
-    }
+    /**
+     * Authorization code grants, the classic way for OAuth with a popup or redirection.
+     * http://oauthlib.readthedocs.io/en/latest/oauth2/grants/authcode.html
+     */
     requestAuthorizationCode(params) {
         params.grant_type = 'authorization_code';
         params.clientId = this.clientConfig.clientId;
         params.clientSecret = this.clientConfig.clientSecret;
         this.require(['scope']);
-        const url = this.endpoint(OAuth.TOKEN_PATH, params) + 'a';
+        const url = this.endpoint(OAuth.TOKEN_PATH, params);
         this.dispatchStatusChangeEvent('loading');
         sdk_1.Local.erase('authorizationTokens');
         return new Promise((resolve, reject) => {
@@ -6622,15 +6559,20 @@ class OAuth {
                 if (res.statusCode === 200) {
                     sdk_1.Local.save('authorizationTokens', data);
                     this.dispatchStatusChangeEvent('authorized');
-                    resolve(new sdk_2.TokenResponse(data));
+                    resolve(new oauth_http_1.TokenResponse(data, res));
                 }
                 else {
                     this.dispatchStatusChangeEvent('unauthorized');
-                    resolve(new sdk_2.TokenResponse(data));
+                    resolve(new oauth_http_1.TokenResponse(data, res));
                 }
             });
         });
     }
+    /**
+     * Request password grant type for use in mobile apps mainly.
+     *
+     * http://oauthlib.readthedocs.io/en/latest/oauth2/grants/password.html
+     */
     requestPasswordGrants(params) {
         params.grant_type = 'password';
         params.clientId = this.clientConfig.clientId;
@@ -6639,27 +6581,74 @@ class OAuth {
         const url = this.endpoint(OAuth.TOKEN_PATH, params);
         return new Promise((resolve, reject) => {
             request(url, (err, res, body) => {
+                const data = JSON.parse(body);
                 if (res.statusCode === 200) {
-                    resolve(new sdk_2.TokenResponse(JSON.parse(body)));
+                    this.dispatchStatusChangeEvent('authorized');
+                    resolve(new oauth_http_1.TokenResponse(data, res));
                 }
                 else {
-                    resolve(new sdk_2.TokenResponse(JSON.parse(body)));
+                    this.dispatchStatusChangeEvent('unauthorized');
+                    resolve(new oauth_http_1.TokenResponse(data, res));
                 }
             });
         });
     }
+    /**
+     * Request implicit grants
+     * http://oauthlib.readthedocs.io/en/latest/oauth2/grants/implicit.html
+     * @todo Might be removed in the future if its not safe.
+     * @deprecated
+     */
     requestImplicitGrants(params) {
+        console.warn(`Requesting implicit grants is not recommended and will be decprecated.`);
+        params.response_type = 'token';
         params.clientId = this.clientConfig.clientId;
         params.clientSecret = this.clientConfig.clientSecret;
+        // this.require(['username', 'password', 'scope']);
         const url = this.endpoint(OAuth.TOKEN_PATH, params);
         return new Promise((resolve, reject) => {
             request(url, (err, res, body) => {
                 if (res.statusCode === 200) {
-                    resolve(new sdk_2.TokenResponse(JSON.parse(body)));
+                    resolve(new oauth_http_1.TokenResponse(JSON.parse(body), res));
                 }
                 else {
-                    resolve(new sdk_2.TokenResponse(JSON.parse(body)));
+                    resolve(new oauth_http_1.TokenResponse(JSON.parse(body), res));
                 }
+            });
+        });
+    }
+    /**
+     * Get login status from Oauth protected API endpoint.
+     */
+    getLoginStatus(refresh = false) {
+        const url = this.endpoint(['api', 'user', 'status']);
+        const headers = this.authHeaders();
+        // if we skip cached responses
+        if (refresh === false) {
+            const data = sdk_1.Local.retrieve('loginStatus');
+            if (data != null) {
+                // dispatch change on the user, the LoginButton listens to this
+                return Promise.resolve(new oauth_http_1.TokenResponse(data, { statusCode: 200 }));
+            }
+        }
+        else {
+            sdk_1.Local.erase('loginStatus');
+        }
+        this.loading(true);
+        return new Promise((resolve, reject) => {
+            request({ url: url, method: POST, headers: headers }, (err, res, body) => {
+                let data;
+                if (res.statusCode === 200) {
+                    data = JSON.parse(body);
+                }
+                else {
+                    // see APi endpoints server side
+                    data = { status: 'unkown', user: null };
+                }
+                sdk_1.Local.save('loginStatus', data);
+                // dispatch change on the user, the LoginButton listens to this
+                this.dispatchStatusChangeEvent('login');
+                resolve(new oauth_http_1.TokenResponse(data, res));
             });
         });
     }
@@ -6675,9 +6664,15 @@ class OAuth {
         const uri = (uris.length > 0) ? `?${uris.join('&')}` : '';
         return `${url}${uri}`;
     }
-    require(keys) {
-        this.requiredOAuthParams = keys;
-        return this;
+    /**
+     * Save access token and refresh token in the cache after success
+     * Dispatch change status event for login/button or other UI stuff.
+     *
+     *
+     */
+    onAuthSuccess(eventName, jsonAuthResData) {
+        sdk_1.Local.save('authorizationTokens', jsonAuthResData);
+        this.dispatchStatusChangeEvent('authorized');
     }
     configureOAuthParams(params) {
         if (typeof params === 'undefined') {
@@ -6690,6 +6685,14 @@ class OAuth {
         }
         this.requiredOAuthParams = [];
         return params;
+    }
+    dispatchStatusChangeEvent(status) {
+        const event = new CustomEvent('status:change', { detail: { status: status, user: this.getUser() } });
+        window.dispatchEvent(event);
+    }
+    require(keys) {
+        this.requiredOAuthParams = keys;
+        return this;
     }
     toSnakeCase(str) {
         return str.split(/(?=[A-Z])/).join('_').toLowerCase();
@@ -6717,19 +6720,19 @@ exports.OAuth = OAuth;
 
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {/**
  * @fileoverview Http request in node.js
  * @author douzi <liaowei08@gmail.com> 
  */
-var http = __webpack_require__(35);
+var http = __webpack_require__(34);
 var util = __webpack_require__(9);
 var url = __webpack_require__(20);
 var path = __webpack_require__(22);
 var querystring = __webpack_require__(21);
-var file = __webpack_require__(55);
+var file = __webpack_require__(54);
 
 /**
  * @description
@@ -6888,7 +6891,7 @@ module.exports = request;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2).Buffer))
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7009,7 +7012,7 @@ function fromByteArray (uint8) {
 
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -7099,12 +7102,12 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global) {var ClientRequest = __webpack_require__(36)
-var extend = __webpack_require__(45)
-var statusCodes = __webpack_require__(46)
+/* WEBPACK VAR INJECTION */(function(global) {var ClientRequest = __webpack_require__(35)
+var extend = __webpack_require__(44)
+var statusCodes = __webpack_require__(45)
 var url = __webpack_require__(20)
 
 var http = exports
@@ -7184,14 +7187,14 @@ http.METHODS = [
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer, global, process) {var capability = __webpack_require__(11)
 var inherits = __webpack_require__(3)
-var response = __webpack_require__(37)
+var response = __webpack_require__(36)
 var stream = __webpack_require__(12)
-var toArrayBuffer = __webpack_require__(44)
+var toArrayBuffer = __webpack_require__(43)
 
 var IncomingMessage = response.IncomingMessage
 var rStates = response.readyStates
@@ -7497,7 +7500,7 @@ var unsafeHeaders = [
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2).Buffer, __webpack_require__(0), __webpack_require__(1)))
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process, Buffer, global) {var capability = __webpack_require__(11)
@@ -7686,13 +7689,13 @@ IncomingMessage.prototype._onXHRProgress = function () {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(2).Buffer, __webpack_require__(0)))
 
 /***/ }),
-/* 38 */
+/* 37 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
 
 /***/ }),
-/* 39 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7772,7 +7775,7 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var apply = Function.prototype.apply;
@@ -7825,13 +7828,13 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(41);
+__webpack_require__(40);
 exports.setImmediate = setImmediate;
 exports.clearImmediate = clearImmediate;
 
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -8024,7 +8027,7 @@ exports.clearImmediate = clearImmediate;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(1)))
 
 /***/ }),
-/* 42 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {
@@ -8098,7 +8101,7 @@ function config (name) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 43 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8134,7 +8137,7 @@ module.exports = PassThrough;
 var Transform = __webpack_require__(19);
 
 /*<replacement>*/
-var util = __webpack_require__(6);
+var util = __webpack_require__(5);
 util.inherits = __webpack_require__(3);
 /*</replacement>*/
 
@@ -8151,7 +8154,7 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
 };
 
 /***/ }),
-/* 44 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Buffer = __webpack_require__(2).Buffer
@@ -8184,7 +8187,7 @@ module.exports = function (buf) {
 
 
 /***/ }),
-/* 45 */
+/* 44 */
 /***/ (function(module, exports) {
 
 module.exports = extend
@@ -8209,7 +8212,7 @@ function extend() {
 
 
 /***/ }),
-/* 46 */
+/* 45 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -8279,7 +8282,7 @@ module.exports = {
 
 
 /***/ }),
-/* 47 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module, global) {var __WEBPACK_AMD_DEFINE_RESULT__;/*! https://mths.be/punycode v1.4.1 by @mathias */
@@ -8815,10 +8818,10 @@ module.exports = {
 
 }(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(48)(module), __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(47)(module), __webpack_require__(0)))
 
 /***/ }),
-/* 48 */
+/* 47 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -8846,7 +8849,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 49 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8869,7 +8872,7 @@ module.exports = {
 
 
 /***/ }),
-/* 50 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8960,7 +8963,7 @@ var isArray = Array.isArray || function (xs) {
 
 
 /***/ }),
-/* 51 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9052,7 +9055,7 @@ var objectKeys = Object.keys || function (obj) {
 
 
 /***/ }),
-/* 52 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {// Copyright Joyent, Inc. and other Node contributors.
@@ -9580,7 +9583,7 @@ function isPrimitive(arg) {
 }
 exports.isPrimitive = isPrimitive;
 
-exports.isBuffer = __webpack_require__(53);
+exports.isBuffer = __webpack_require__(52);
 
 function objectToString(o) {
   return Object.prototype.toString.call(o);
@@ -9624,7 +9627,7 @@ exports.log = function() {
  *     prototype.
  * @param {function} superCtor Constructor function to inherit prototype from.
  */
-exports.inherits = __webpack_require__(54);
+exports.inherits = __webpack_require__(53);
 
 exports._extend = function(origin, add) {
   // Don't do anything if add isn't an object
@@ -9645,7 +9648,7 @@ function hasOwnProperty(obj, prop) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(1)))
 
 /***/ }),
-/* 53 */
+/* 52 */
 /***/ (function(module, exports) {
 
 module.exports = function isBuffer(arg) {
@@ -9656,7 +9659,7 @@ module.exports = function isBuffer(arg) {
 }
 
 /***/ }),
-/* 54 */
+/* 53 */
 /***/ (function(module, exports) {
 
 if (typeof Object.create === 'function') {
@@ -9685,17 +9688,17 @@ if (typeof Object.create === 'function') {
 
 
 /***/ }),
-/* 55 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * @fileoverview Strengthen the ability of file system
  * @author wliao <wliao@Ctrip.com> 
  */
-var fs = __webpack_require__(56);
+var fs = __webpack_require__(55);
 var util = __webpack_require__(9);
 var path = __webpack_require__(22);
-var fileMatch = __webpack_require__(57);
+var fileMatch = __webpack_require__(56);
 
 function checkCbAndOpts(options, callback) {
   if (util.isFunction(options)) {
@@ -10025,13 +10028,13 @@ exports.copySync = function(dirpath, destpath, options) {
 };
 
 /***/ }),
-/* 56 */
+/* 55 */
 /***/ (function(module, exports) {
 
 
 
 /***/ }),
-/* 57 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var util = __webpack_require__(9);
@@ -10119,13 +10122,66 @@ function fileMatch(filter, ignore) {
 module.exports = fileMatch;
 
 /***/ }),
+/* 57 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+__export(__webpack_require__(58));
+
+
+/***/ }),
 /* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const sdk_1 = __webpack_require__(5);
+class ErrorResponse {
+    constructor(data, response) {
+        for (let prop in data) {
+            if (data.hasOwnProperty(prop)) {
+                this[prop] = data[prop];
+            }
+        }
+        if (response) {
+            this.statusCode = response.statusCode;
+        }
+    }
+    has(prop) {
+        return this[prop] !== 'undefined' ? true : false;
+    }
+    isSuccessful() {
+        return (this.error == null) ? true : false;
+    }
+}
+exports.ErrorResponse = ErrorResponse;
+class TokenResponse extends ErrorResponse {
+    constructor(data, response) {
+        super(data, response);
+    }
+}
+exports.TokenResponse = TokenResponse;
+class AuthorizationResponse extends ErrorResponse {
+    constructor(data) {
+        super(data);
+    }
+}
+exports.AuthorizationResponse = AuthorizationResponse;
+
+
+/***/ }),
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const sdk_1 = __webpack_require__(6);
 /**
  * Main wrapper 360 connect class.
  */
@@ -10141,7 +10197,7 @@ exports.Connect = Connect;
 
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10150,17 +10206,17 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(60));
+__export(__webpack_require__(61));
 
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const sdk_1 = __webpack_require__(5);
+const sdk_1 = __webpack_require__(6);
 // import * as LogoSvg from '../../assets/ripple.svg';
 // import txt from 'raw-loader!./../../assets/ripple-data-uri.txt';
 /**
@@ -10305,7 +10361,6 @@ exports.LoginButton = LoginButton;
 
 
 /***/ }),
-/* 61 */,
 /* 62 */
 /***/ (function(module, exports) {
 

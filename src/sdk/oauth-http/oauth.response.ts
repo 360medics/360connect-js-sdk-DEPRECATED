@@ -3,16 +3,21 @@ export class ErrorResponse
     error?: string;
     error_uri?: string;
     error_description?: string;
+    statusCode: number;
 
-    constructor(data: any)
+    constructor(data: any, response?: any)
     {
         for (let prop in data) {
             if (data.hasOwnProperty(prop)) {
                 this[prop] = data[prop];
             }
         }
+
+        if (response) {
+            this.statusCode = response.statusCode;
+        }
     }
-    
+
     has(prop: string)
     {
         return this[prop] !== 'undefined' ? true : false;
@@ -30,10 +35,10 @@ export class TokenResponse extends ErrorResponse
     token_type: string;
     expires_in: string;
     refresh_token: string;
-
-    constructor(data: any)
+    
+    constructor(data: any, response?: any)
     {
-        super(data);
+        super(data, response);
     }
 }
 
