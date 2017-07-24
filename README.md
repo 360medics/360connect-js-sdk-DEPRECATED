@@ -2,6 +2,10 @@
 
 ![Login Button](test/docs/login-button-loggedout.png)
 
+<div style="center">
+<img src="test/docs/login-button-loggedout.png" height="54" alt="360connect login button">
+</div>
+
 ## Getting started on the web
 
 Import the SDK js bundle into your HTML page (see also example in `web-login-demo.html`).
