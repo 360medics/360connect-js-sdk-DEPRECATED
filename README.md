@@ -1,8 +1,6 @@
 # OAuth 360 Connect JS SDK
 
-<div style="text-align:center">
-![Login Button](https://raw.githubusercontent.com/adadgio/360connect-js-sdl/master/test/docs/login-button-loggedout.png)
-</div>
+![Login Button](test/docs/login-button-loggedout.png)
 
 ## Getting started on the web
 
@@ -48,7 +46,7 @@ Connect.OAuth()
 Show the login button (featuring user status) somewhere in your HTML.
 
 <div style="text-align:center">
-![Login Button](https://raw.githubusercontent.com/adadgio/360connect-js-sdl/master/test/docs/login-button-loggedout.png)
+![Login Button](test/docs/login-button-loggedout.png)
 </div>
 
 ```html
