@@ -69,10 +69,11 @@ Connect.OAuth().getLoginStatus(true).then(response => {
 });
 ```
 
-
-### OAuth endpoints responses
+### OAuth endpoints responses and methods
 
 | JS method  | OAuth endpoint / API endpoint | Success response | Error response |
 | ------------- | ------------- | ------------- | ------------- |
-| getLoginStatus() | `/api/user/status` | `{status: "connected", user: {...}}` | `{status: "unkown", user: null}` |
-| requestAuthorizationCode() | `/oauth/v2/auth` | `{access_token: "", expires_in: 3600, refresh_token: "", token_type:"bearer", scope: "<yourScope>"}` |  | `{error: "invalid_client", error_description: "The client credentials are invalid"}` |
+| getLoginStatus(forceRefresh:boolean) | `/api/user/status` | `{status: "connected", user: {...}}` | `{status: "unkown", user: null}` |
+| requestAuthorizationCode(<OAuthParams>) | `/oauth/v2/auth` | `{access_token: "", expires_in: 3600, refresh_token: "", token_type:"bearer", scope: "<yourScope>"}` |  | `{error: "invalid_client", error_description: "The client credentials are invalid"}` |
+| loginPrompt() | Popup the authorization/login window | n/a | n/a |
+| afterLogin(callback:Function) | Triggers when the user successfully authorized your app (and closes the popup) | n/a | n/a |
