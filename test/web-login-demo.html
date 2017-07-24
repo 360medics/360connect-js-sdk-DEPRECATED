@@ -13,7 +13,7 @@
         const CLIENT_SECRET = '6cmwgzlkgx0kg4wkcs4gk0o0owgc80k44cs0cc8g8sgko40ckc';
         const REDIRECT_URI = 'http://360medical.dev/oauth/v2/auth_login_success';
         const SCOPE = 'anon_scope';
-        
+
         Connect.OAuth()
             .initialize({ clientId: CLIENT_ID, clientSecret: CLIENT_SECRET, environment: ENV });
 
@@ -37,10 +37,7 @@
         // Connect.OAuth().requestImplicitGrants().then(function(res){
         //     console.log(res);
         // });
-
-        const userApiKey = '32703e5c1818ba3d43ddf929e79c6788';
-        const params = { state: 'abcd', redirectUri: REDIRECT_URI, scope: SCOPE };
-
+        
         // set what should be done after login (save tokens on your end maybe?)
         Connect.OAuth().afterLogin(function(data) {
             // console.log(data.code, data.state);

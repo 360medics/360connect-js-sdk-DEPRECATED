@@ -1,5 +1,9 @@
 # OAuth 360 Connect JS SDK
 
+<div style="text-align:center">
+![Login Button](https://raw.githubusercontent.com/adadgio/360connect-js-sdl/master/test/docs/login-button-loggedout.png)
+</div>
+
 ## Getting started on the web
 
 Import the SDK js bundle into your HTML page (see also example in `web-login-demo.html`).
@@ -39,4 +43,33 @@ Connect.OAuth()
 
 ```
 
+### Showing the login button
+
+Show the login button (featuring user status) somewhere in your HTML.
+
+<div style="text-align:center">
+![Login Button](https://raw.githubusercontent.com/adadgio/360connect-js-sdl/master/test/docs/login-button-loggedout.png)
+</div>
+
+```html
+<login-button></login-button>
+```
+
 ### Checking logged in status
+
+This is what you should do first to check if the user is already logged in to 360medical.
+
+```javascript
+// first check user logged in status
+// pass true to force a request otherwise the SDK loads status from the cache
+Connect.OAuth().getLoginStatus(true).then(response => {
+
+    // response {}
+
+    if (response.status === "connected") {
+        let user = Connect.OAuth().getUser(); // { user: { <data depends on the scope...> } }    
+    } else {
+        // not connected, we might want to show to login button here
+    }
+});
+```
