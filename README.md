@@ -45,7 +45,9 @@ Connect.OAuth()
 
 ### Showing the login button
 
-Show the login button (featuring user status) somewhere in your HTML <img src="test/docs/login-button-loggedout.png" height="14" alt="360connect login button" style="display:inline-block">.
+<div style="display:flex">
+Show the login button (featuring user status) somewhere in your HTML <img src="test/docs/login-button-loggedout.png" height="17" alt="360connect login button" style="display:inline-block;margin-left:4px">.
+</div>
 
 ```html
 <login-button></login-button>
