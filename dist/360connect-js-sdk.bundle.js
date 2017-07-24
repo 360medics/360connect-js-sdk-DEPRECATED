@@ -6503,18 +6503,45 @@ class OAuth {
         const loginUrl = this.endpoint(OAuth.LOGIN_PATH, params);
         return loginUrl;
     }
-    login(method) {
-        this.onLogin = method;
-        return this;
+    loading(bool) {
+        if (true === bool) {
+            this.dispatchStatusChangeEvent('loading');
+        }
+        else {
+        }
+    }
+    logout() {
+        sdk_1.Local.erase('time');
+        sdk_1.Local.erase('loginStatus');
+        sdk_1.Local.erase('authorizationTokens');
+        this.dispatchStatusChangeEvent('logout');
     }
     loginPrompt(params) {
         this.popup = window.open(this.getLoginUrl(params), '_blank', 'status=0,toolbar=0,height=610,width=540');
         return this;
     }
-    logout() {
-        sdk_1.Local.erase('getLoginStatus');
-        sdk_1.Local.erase('authorizationTokens');
-        this.dispatchStatusChangeEvent();
+    // loginWithApiKey(apiKey: string, params: OAuthParameters)
+    // {
+    //     const url = this.endpoint(['rest', 'login']);
+    //     const headers = this.jsonHeaders();
+    //     const opts = { url: url, method: POST, headers: headers, data: { api_key: apiKey } }
+    //
+    //     return new Promise((resolve, reject) => {
+    //         request(opts, (err, res, body) => {
+    //             if (res.statusCode === 200) {
+    //                 resolve(new TokenResponse(JSON.parse(body)));
+    //             } else {
+    //                 resolve(new TokenResponse(JSON.parse(body)));
+    //             }
+    //         });
+    //     });
+    //
+    //     // this.popup = window.open(url, '_blank', 'status=0,toolbar=0,height=610,width=540');
+    //     // return this;
+    // }
+    afterLogin(method) {
+        this.onLogin = method;
+        return this;
     }
     afterPopup(e) {
         if (this.popup !== null) {
@@ -6532,17 +6559,16 @@ class OAuth {
         const headers = this.authHeaders();
         // if we skip cached responses
         if (refresh === false) {
-            const data = sdk_1.Local.retrieve('getLoginStatus');
+            const data = sdk_1.Local.retrieve('loginStatus');
             if (data != null) {
                 // dispatch change on the user, the LoginButton listens to this
-                // this.dispatchStatusChangeEvent();
                 return Promise.resolve(new sdk_2.TokenResponse(data));
             }
         }
         else {
-            sdk_1.Local.erase('getLoginStatus');
-            // this.dispatchStatusChangeEvent();
+            sdk_1.Local.erase('loginStatus');
         }
+        this.loading(true);
         return new Promise((resolve, reject) => {
             request({ url: url, method: POST, headers: headers }, (err, res, body) => {
                 let data;
@@ -6553,9 +6579,9 @@ class OAuth {
                     // see APi endpoints server side
                     data = { status: 'unkown', user: null };
                 }
-                sdk_1.Local.save('getLoginStatus', data);
+                sdk_1.Local.save('loginStatus', data);
                 // dispatch change on the user, the LoginButton listens to this
-                this.dispatchStatusChangeEvent();
+                this.dispatchStatusChangeEvent('login');
                 resolve(new sdk_2.TokenResponse(data));
             });
         });
@@ -6568,7 +6594,7 @@ class OAuth {
         // @todo
     }
     getUser() {
-        const data = sdk_1.Local.retrieve('getLoginStatus');
+        const data = sdk_1.Local.retrieve('loginStatus');
         return (data === null) ? null : data.user;
     }
     getRefreshToken() {
@@ -6578,8 +6604,8 @@ class OAuth {
     setRefreshToken(token) {
         // @todo
     }
-    dispatchStatusChangeEvent() {
-        const event = new CustomEvent('status:changed', { detail: { user: this.getUser() } });
+    dispatchStatusChangeEvent(status) {
+        const event = new CustomEvent('status:change', { detail: { status: status, user: this.getUser() } });
         window.dispatchEvent(event);
     }
     requestAuthorizationCode(params) {
@@ -6588,17 +6614,18 @@ class OAuth {
         params.clientSecret = this.clientConfig.clientSecret;
         this.require(['scope']);
         const url = this.endpoint(OAuth.TOKEN_PATH, params);
+        this.dispatchStatusChangeEvent('loading');
         sdk_1.Local.erase('authorizationTokens');
         return new Promise((resolve, reject) => {
             request(url, (err, res, body) => {
                 const data = JSON.parse(body);
                 if (res.statusCode === 200) {
-                    // this.accessToken = data.access_token;
-                    // this.refreshToken = data.refresh_token;
                     sdk_1.Local.save('authorizationTokens', data);
+                    this.dispatchStatusChangeEvent('authorized');
                     resolve(new sdk_2.TokenResponse(data));
                 }
                 else {
+                    this.dispatchStatusChangeEvent('unauthorized');
                     resolve(new sdk_2.TokenResponse(data));
                 }
             });
@@ -6671,6 +6698,11 @@ class OAuth {
         return {
             'Content-Type': 'application/json; charset=utf-8',
             'Authorization': `Bearer ${this.getAccessToken()}`,
+        };
+    }
+    jsonHeaders() {
+        return {
+            'Content-Type': 'application/json; charset=utf-8',
         };
     }
 }
@@ -10129,6 +10161,8 @@ __export(__webpack_require__(60));
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const sdk_1 = __webpack_require__(5);
+// import * as LogoSvg from '../../assets/ripple.svg';
+// import txt from 'raw-loader!./../../assets/ripple-data-uri.txt';
 /**
  * Custom HTML element button.
  */
@@ -10139,7 +10173,7 @@ class LoginButton extends HTMLElement {
         super();
         const config = sdk_1.Config.getConfig()['api'];
         const domain = `${config.PROTOCOL}://${config.DOMAIN}`;
-        const data = sdk_1.Local.retrieve('getLoginStatus');
+        const data = sdk_1.Local.retrieve('loginStatus');
         const user = (data === null) ? null : data.user;
         let imgSrc = this.logoUri();
         let btnText = '360 Connect';
@@ -10147,6 +10181,7 @@ class LoginButton extends HTMLElement {
             imgSrc = `${domain}${user.avatar}`;
             btnText = user.surname;
         }
+        this.loaderDataUri = __webpack_require__(62);
         // slot is a placeholder for user custom text inside the custom element markup
         // slot can also be replaced by text using "this.textContent"
         const shadowRoot = this.attachShadow({ mode: 'open' });
@@ -10162,8 +10197,9 @@ class LoginButton extends HTMLElement {
         `;
         // this relies/depends uniquely on HTML markup above
         let imgNode = shadowRoot.childNodes[2].childNodes[1].childNodes[1].childNodes[1];
-        window.addEventListener('status:changed', (e) => {
-            this.updateButton(e.detail.user, imgNode);
+        window.addEventListener('status:change', (e) => {
+            // e.detail.status is "login|loading"
+            this.updateButton(e.detail.status, e.detail.user, imgNode);
         });
         this.addEventListener('click', e => {
             this.onClick(e);
@@ -10190,16 +10226,21 @@ class LoginButton extends HTMLElement {
         // }
         // console.log(this.childNodes[2].childNodes[1].childNodes[1].childNodes[1]);
     }
-    updateButton(user, imgNode) {
+    updateButton(status, user, imgNode) {
         const config = sdk_1.Config.getConfig()['api'];
         const domain = `${config.PROTOCOL}://${config.DOMAIN}`;
-        if (user === null) {
-            this.textContent = '360 Connect';
-            imgNode.src = this.logoUri();
+        if (status === 'loading') {
+            imgNode.src = this.loaderDataUri;
         }
         else {
-            this.textContent = user.surname;
-            imgNode.src = `${domain}${user.avatar}`;
+            if (user === null) {
+                this.textContent = '360 Connect';
+                imgNode.src = this.logoUri();
+            }
+            else {
+                this.textContent = user.surname;
+                imgNode.src = `${domain}${user.avatar}`;
+            }
         }
     }
     onClick(e) {
@@ -10262,6 +10303,13 @@ class LoginButton extends HTMLElement {
 }
 exports.LoginButton = LoginButton;
 
+
+/***/ }),
+/* 61 */,
+/* 62 */
+/***/ (function(module, exports) {
+
+module.exports = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzBweCIgIGhlaWdodD0iMzBweCIgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIiBjbGFzcz0ibGRzLXJpcHBsZSI+CiAgICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSIzNS40MjE0IiBmaWxsPSJub25lIiBuZy1hdHRyLXN0cm9rZT0ie3tjb25maWcuYzF9fSIgbmctYXR0ci1zdHJva2Utd2lkdGg9Int7Y29uZmlnLndpZHRofX0iIHN0cm9rZT0iI2Q1MjEwYSIgc3Ryb2tlLXdpZHRoPSI0Ij4KICAgICAgPGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgY2FsY01vZGU9InNwbGluZSIgdmFsdWVzPSIwOzQwIiBrZXlUaW1lcz0iMDsxIiBkdXI9IjEuNSIga2V5U3BsaW5lcz0iMCAwLjIgMC44IDEiIGJlZ2luPSItMC43NXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIj48L2FuaW1hdGU+CiAgICAgIDxhbmltYXRlIGF0dHJpYnV0ZU5hbWU9Im9wYWNpdHkiIGNhbGNNb2RlPSJzcGxpbmUiIHZhbHVlcz0iMTswIiBrZXlUaW1lcz0iMDsxIiBkdXI9IjEuNSIga2V5U3BsaW5lcz0iMC4yIDAgMC44IDEiIGJlZ2luPSItMC43NXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIj48L2FuaW1hdGU+CiAgICA8L2NpcmNsZT4KICAgIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjE2LjgwNzYiIGZpbGw9Im5vbmUiIG5nLWF0dHItc3Ryb2tlPSJ7e2NvbmZpZy5jMn19IiBuZy1hdHRyLXN0cm9rZS13aWR0aD0ie3tjb25maWcud2lkdGh9fSIgc3Ryb2tlPSIjZjE4ZDAxIiBzdHJva2Utd2lkdGg9IjQiPgogICAgICA8YW5pbWF0ZSBhdHRyaWJ1dGVOYW1lPSJyIiBjYWxjTW9kZT0ic3BsaW5lIiB2YWx1ZXM9IjA7NDAiIGtleVRpbWVzPSIwOzEiIGR1cj0iMS41IiBrZXlTcGxpbmVzPSIwIDAuMiAwLjggMSIgYmVnaW49IjBzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSI+PC9hbmltYXRlPgogICAgICA8YW5pbWF0ZSBhdHRyaWJ1dGVOYW1lPSJvcGFjaXR5IiBjYWxjTW9kZT0ic3BsaW5lIiB2YWx1ZXM9IjE7MCIga2V5VGltZXM9IjA7MSIgZHVyPSIxLjUiIGtleVNwbGluZXM9IjAuMiAwIDAuOCAxIiBiZWdpbj0iMHMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIj48L2FuaW1hdGU+CiAgICA8L2NpcmNsZT4KICA8L3N2Zz4=\n"
 
 /***/ })
 /******/ ]);

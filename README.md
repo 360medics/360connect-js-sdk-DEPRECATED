@@ -1,38 +1,42 @@
-# Google AppEngine Adadgio Project
+# OAuth 360 Connect JS SDK
 
-## Development
+## Getting started on the web
 
-First `cd` to the top folder directory `cd ./adadgio-gcloud`.
+Import the SDK js bundle into your HTML page (see also example in `web-login-demo.html`).
 
-**Run Typecript compiler**
-
-```bash
-npm run watch
+```html
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>360Connect JS SDK</title>
+    <!-- jquery helpers to to that demo quicker -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
+    <script src="../dist/360connect-js-sdk.bundle.js"></script>`
+</head>
+<body>
+    ...
+</body>
+</html>
 ```
 
-If you change configuration files (like `./config/parameters.dev.json` or `app|cron|*.yaml`), you need to run `npm run watch` again (it copies necessary assets under the hood into the `./dist/*` directory).
+### Configuration
 
-If more assets need to be copied to specific `./dist` location, edit the `build.sh` file at project root directory.
+Configure the SDK with your API keys and client credentials. Choose `ENV=staging` for the sandbox (`beta.360medical.fr`).
 
-**Reduce Google Cloud Platform billing**
+See also (notes about security in single page applications)[#security].
 
-Read this [blog post](https://medium.com/google-cloud/three-simple-steps-to-save-costs-when-prototyping-with-app-engine-flexible-environment-104fc6736495) from Sandeep Dinesh
+```javascript
+const ENV = 'staging';
+const CLIENT_ID = '<MY_CLIENT_ID>';
+const CLIENT_SECRET = '<MY_CLIENT_SECRET>';
+const REDIRECT_URI = 'http://beta.360medical.fr/oauth/v2/auth_login_success'; // to enable the web popup
+const SCOPE = 'anon_scope'; // choose a scope 'anon_scope|reduced_scope|full_scope'
 
-## Deploy to app engine
+// initialize the SDK
+Connect.OAuth()
+    .initialize({ clientId: CLIENT_ID, clientSecret: CLIENT_SECRET, environment: ENV });
 
-```bash
-npm run deploy
 ```
 
-This will run `tsc`, copy assets and deploy to the cloud console.
-
-## Configurations
-
-firebase: `firebase use <default|dev|staging|prod>`
-
-gcloud: `gcloud config configurations activate <default|dev|staging|prod>`
-
-Other usefull gcloud commands
-
-- List all configurations: `gcloud config configurations list`
-- List config parameters for current configuration:  `gcloud config list`
+### Checking logged in status

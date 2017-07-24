@@ -20,6 +20,8 @@
   "devDependencies": {
     "@types/node": "^8.0.8",
     "json-loader": "^0.5.4",
+    "raw-loader": "^0.5.1",
+    "svg-url-loader": "^2.1.1",
     "ts-loader": "^2.3.0",
     "typescript": "^2.3.2"
   }

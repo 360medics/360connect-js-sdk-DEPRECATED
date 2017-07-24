@@ -1,10 +1,14 @@
 import { Config, Local } from '../../sdk';
+// import * as LogoSvg from '../../assets/ripple.svg';
+// import txt from 'raw-loader!./../../assets/ripple-data-uri.txt';
 
 /**
  * Custom HTML element button.
  */
 export class LoginButton extends HTMLElement
 {
+    private loaderDataUri: string;
+
     // monitor the "user" attribute for changes.
     static get observedAttributes() {return ['username']; }
 
@@ -13,16 +17,18 @@ export class LoginButton extends HTMLElement
 
         const config = Config.getConfig()['api'];
         const domain = `${config.PROTOCOL}://${config.DOMAIN}`;
-        const data = Local.retrieve('getLoginStatus');
+        const data = Local.retrieve('loginStatus');
         const user = (data === null) ? null : data.user;
 
         let imgSrc = this.logoUri();
         let btnText = '360 Connect';
-        
+
         if (user !== null) {
             imgSrc = `${domain}${user.avatar}`;
             btnText = user.surname;
         }
+
+        this.loaderDataUri = require('../../assets/ripple-data-uri.txt');
 
         // slot is a placeholder for user custom text inside the custom element markup
         // slot can also be replaced by text using "this.textContent"
@@ -41,10 +47,11 @@ export class LoginButton extends HTMLElement
         // this relies/depends uniquely on HTML markup above
         let imgNode: any = shadowRoot.childNodes[2].childNodes[1].childNodes[1].childNodes[1];
 
-        window.addEventListener('status:changed', (e: CustomEvent) => {
-            this.updateButton(e.detail.user, imgNode);
+        window.addEventListener('status:change', (e: CustomEvent) => {
+            // e.detail.status is "login|loading"
+            this.updateButton(e.detail.status, e.detail.user, imgNode);
         });
-
+        
         this.addEventListener('click', e => {
             this.onClick(e);
         });
@@ -79,17 +86,21 @@ export class LoginButton extends HTMLElement
         // console.log(this.childNodes[2].childNodes[1].childNodes[1].childNodes[1]);
     }
 
-    updateButton(user: any, imgNode)
+    updateButton(status: string, user: any, imgNode)
     {
         const config = Config.getConfig()['api'];
         const domain = `${config.PROTOCOL}://${config.DOMAIN}`;
 
-        if (user === null) {
-            this.textContent = '360 Connect';
-            imgNode.src = this.logoUri();
+        if (status === 'loading') {
+            imgNode.src = this.loaderDataUri;
         } else {
-            this.textContent = user.surname;
-            imgNode.src = `${domain}${user.avatar}`;
+            if (user === null) {
+                this.textContent = '360 Connect';
+                imgNode.src = this.logoUri();
+            } else {
+                this.textContent = user.surname;
+                imgNode.src = `${domain}${user.avatar}`;
+            }
         }
     }
 

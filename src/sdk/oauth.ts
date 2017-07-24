@@ -30,6 +30,7 @@ export type OAuthParameters = {
 export class OAuth
 {
     private config: any;
+    private logo: any;
     private clientConfig: OAuthClientInitConfig;
     private requiredOAuthParams: Array<string> = []
 
@@ -75,10 +76,23 @@ export class OAuth
         return loginUrl;
     }
 
-    login(method: Function)
+    loading(bool: boolean)
     {
-        this.onLogin = method;
-        return this;
+
+        if (true === bool) {
+            this.dispatchStatusChangeEvent('loading');
+        } else {
+
+        }
+    }
+
+    logout()
+    {
+        Local.erase('time');
+        Local.erase('loginStatus');
+        Local.erase('authorizationTokens');
+
+        this.dispatchStatusChangeEvent('logout');
     }
 
     loginPrompt(params: OAuthParameters)
@@ -87,11 +101,30 @@ export class OAuth
         return this;
     }
 
-    logout()
+    // loginWithApiKey(apiKey: string, params: OAuthParameters)
+    // {
+    //     const url = this.endpoint(['rest', 'login']);
+    //     const headers = this.jsonHeaders();
+    //     const opts = { url: url, method: POST, headers: headers, data: { api_key: apiKey } }
+    //
+    //     return new Promise((resolve, reject) => {
+    //         request(opts, (err, res, body) => {
+    //             if (res.statusCode === 200) {
+    //                 resolve(new TokenResponse(JSON.parse(body)));
+    //             } else {
+    //                 resolve(new TokenResponse(JSON.parse(body)));
+    //             }
+    //         });
+    //     });
+    //
+    //     // this.popup = window.open(url, '_blank', 'status=0,toolbar=0,height=610,width=540');
+    //     // return this;
+    // }
+
+    afterLogin(method: Function)
     {
-        Local.erase('getLoginStatus');
-        Local.erase('authorizationTokens');
-        this.dispatchStatusChangeEvent();
+        this.onLogin = method;
+        return this;
     }
 
     afterPopup(e: any)
@@ -115,18 +148,18 @@ export class OAuth
 
         // if we skip cached responses
         if (refresh === false) {
-            const data = Local.retrieve('getLoginStatus');
+            const data = Local.retrieve('loginStatus');
 
             if (data != null) {
                 // dispatch change on the user, the LoginButton listens to this
-                // this.dispatchStatusChangeEvent();
                 return Promise.resolve(new TokenResponse(data));
             }
 
         } else {
-            Local.erase('getLoginStatus');
-            // this.dispatchStatusChangeEvent();
+            Local.erase('loginStatus');
         }
+
+        this.loading(true);
 
         return new Promise((resolve, reject) => {
             request({ url: url, method: POST, headers: headers }, (err, res, body) => {
@@ -139,9 +172,9 @@ export class OAuth
                     data = { status: 'unkown', user: null };
                 }
 
-                Local.save('getLoginStatus', data);
+                Local.save('loginStatus', data);
                 // dispatch change on the user, the LoginButton listens to this
-                this.dispatchStatusChangeEvent();
+                this.dispatchStatusChangeEvent('login');
                 resolve(new TokenResponse(data));
 
             });
@@ -161,7 +194,7 @@ export class OAuth
 
     getUser()
     {
-        const data = Local.retrieve('getLoginStatus');
+        const data = Local.retrieve('loginStatus');
         return (data === null) ? null : data.user;
     }
 
@@ -176,12 +209,12 @@ export class OAuth
         // @todo
     }
 
-    dispatchStatusChangeEvent()
+    dispatchStatusChangeEvent(status: string)
     {
-        const event = new CustomEvent('status:changed', { detail: { user: this.getUser() } });
+        const event = new CustomEvent('status:change', { detail: { status: status, user: this.getUser() } });
         window.dispatchEvent(event);
     }
-
+    
     requestAuthorizationCode(params: OAuthParameters)
     {
         params.grant_type = 'authorization_code';
@@ -190,6 +223,7 @@ export class OAuth
 
         this.require(['scope']);
         const url = this.endpoint(OAuth.TOKEN_PATH, params);
+        this.dispatchStatusChangeEvent('loading');
 
         Local.erase('authorizationTokens');
 
@@ -198,13 +232,12 @@ export class OAuth
                 const data = JSON.parse(body);
 
                 if (res.statusCode === 200) {
-                    // this.accessToken = data.access_token;
-                    // this.refreshToken = data.refresh_token;
                     Local.save('authorizationTokens', data);
-
+                    this.dispatchStatusChangeEvent('authorized');
                     resolve(new TokenResponse(data));
 
                 } else {
+                    this.dispatchStatusChangeEvent('unauthorized');
                     resolve(new TokenResponse(data));
                 }
             });
@@ -297,6 +330,13 @@ export class OAuth
         return {
             'Content-Type': 'application/json; charset=utf-8',
             'Authorization': `Bearer ${this.getAccessToken()}`,
+        }
+    }
+
+    private jsonHeaders()
+    {
+        return {
+            'Content-Type': 'application/json; charset=utf-8',
         }
     }
 }
