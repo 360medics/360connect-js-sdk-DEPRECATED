@@ -68,3 +68,10 @@ Connect.OAuth().getLoginStatus(true).then(response => {
     }
 });
 ```
+
+
+### OAuth endpoints responses
+
+| JS method  | OAuth endpoint | Success response | Error response |
+| ------------- | ------------- | ------------- | ------------- |
+| getLoginStatus(refresh<boolean>) | `{status: "connected", user: {...}}` |  | `{status: "unkown", user: null}` |
