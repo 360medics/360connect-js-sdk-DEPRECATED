@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>360Connect JS SDK - Testing</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
+    <script src="../dist/360connect-js-sdk.bundle.js"></script>
+
+    <script>
+        const ENV = 'dev';
+        const CLIENT_ID = '1_2kazv0v7xrs444kcgss044s080o80w84co8o0coc0cg4ko0okc';
+        const CLIENT_SECRET = '6cmwgzlkgx0kg4wkcs4gk0o0owgc80k44cs0cc8g8sgko40ckc';
+        const REDIRECT_URI = 'http://oauth-demos.dev/test/implicit-grant.html';
+        const SCOPE = 'anon_scope';
+
+        Connect.OAuth()
+            .initialize({ clientId: CLIENT_ID, clientSecret: CLIENT_SECRET, environment: ENV });
+
+        // skip user login if we have his api key passed by the native app
+        // the api changes every time the user logs in and is a ONE time use
+        const userApiKey = Connect.QueryParams().getQueryParam('api_key');
+
+        // catch the OAuth implicit response (hashtags!)
+        Connect.OAuth().afterLogin(function(/* data*/) {
+            Connect.OAuth().getLoginStatus(true).then(response => {
+                console.log(response);
+            });
+        });
+
+        $(function() {
+            const params = { state: 'abcd', redirectUri: REDIRECT_URI, scope: SCOPE };
+
+            $('#login-button').bind('click', function() {
+                Connect.OAuth().loginPrompt(params, true); // true to require imlicit grant workflow
+            });
+            
+            if (null === userApiKey) {
+                $('#error').text('Missing user <api_key> parameter in GET query param.');
+            } else {
+                Connect.OAuth().setUserApiKey(userApiKey);
+            }
+        });
+    </script>
+</head>
+<body>
+
+    <div>
+        <login-button id="login-button"></login-button>
+    </div>
+
+    <p>
+        <span id="info"></span>
+        <span id="error" style="color:red"></span>
+    </p>
+</body>
