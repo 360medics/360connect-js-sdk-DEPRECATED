@@ -2,5 +2,8 @@
     "api": {
         "PROTOCOL": "http",
         "DOMAIN": "360medical.dev"
+    },
+    "mixpanel": {
+        "token": "da6b24675562342ee90f37a0a67d0ae4"
     }
 }

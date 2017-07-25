@@ -12,48 +12,38 @@
         const CLIENT_ID = '1_2kazv0v7xrs444kcgss044s080o80w84co8o0coc0cg4ko0okc';
         const CLIENT_SECRET = '6cmwgzlkgx0kg4wkcs4gk0o0owgc80k44cs0cc8g8sgko40ckc';
         const REDIRECT_URI = 'http://360medical.dev/oauth/v2/auth_login_success';
-        const SCOPE = 'anon_scope';
-
-        Connect.OAuth()
-            .initialize({ clientId: CLIENT_ID, clientSecret: CLIENT_SECRET, environment: ENV });
-
-        // using client_credentials grant type is discouraged
-        // use normal OAuth flow insteatd
-        // Connect.OAuth()
-        //     .getToken({ state: 'amyPeronsStae', scope: [] })
-        //     .then(function (res) {
-        //         console.log(res.isSuccessful(), res);
-        //     });
-
-        // let params = { username: 'romain.bruckert@bluewink.fr', password: 'frenchfrog', scope: SCOPE };
-        // Connect.OAuth().requestPasswordGrants(params).then(function (res) {
-        //     console.log(res);
-        // });
-
-        // Connect.OAuth().getLoginStatus().then(function(res){
-        //     console.log(res);
-        // });
-        //
-        // Connect.OAuth().requestImplicitGrants().then(function(res){
-        //     console.log(res);
-        // });
-
-        // set what should be done after login (save tokens on your end maybe?)
-        Connect.OAuth().afterLogin(function(data) {
-            // console.log(data.code, data.state);
-            Connect.OAuth().requestAuthorizationCode({ code: data.code, redirectUri: REDIRECT_URI, scope: SCOPE }).then(function(response) {
-                // console.log(Connect.OAuth().getAccessToken());
-                Connect.OAuth().getLoginStatus(true).then(response => {
-                    console.log(response);
-                });
-
-            });
+        const SCOPE = 'full_scope';
+        
+        Connect.initialize({
+            clientId: CLIENT_ID,
+            clientSecret: CLIENT_SECRET,
+            environment: ENV,
+            package: 'com.demo.medical',
+            version: '0.3.2',
         });
 
         $(function() {
+            Connect.enableTracking();
+
+
+            // set what should be done after login (save tokens on your end maybe?)
+            Connect.OAuth().afterLogin(function(data) {
+                // console.log(data.code, data.state);
+                Connect.OAuth().requestAuthorizationCode({ code: data.code, redirectUri: REDIRECT_URI, scope: SCOPE }).then(function(response) {
+                    // console.log(Connect.OAuth().getAccessToken());
+                    Connect.OAuth().getLoginStatus(true).then(response => {
+                        if (response.status === 'connected') {
+                            Connect.track('app.open');
+                        }
+                    });
+
+                });
+            });
+
+
             // attach login/authorize prompt on login button
             $('#login-button').on('click', function() {
-                Connect.OAuth().loginPrompt({ state: 'abcd', redirectUri: REDIRECT_URI, scope: SCOPE });
+                Connect.OAuth().login({ state: 'abcd', redirectUri: REDIRECT_URI, scope: SCOPE });
             });
             $('#logout-button').bind('click', function() {
                 Connect.OAuth().logout();
@@ -64,7 +54,9 @@
                 console.log(response);
                 // console.log(Connect.OAuth().getAccessToken());
 
-                if (response.status === "connected") {
+                if (response.status === 'connected') {
+                    Connect.track('app.open');
+
                     $('#if-logged-in').show();
                     $('#if-logged-out').hide();
 
