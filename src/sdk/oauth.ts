@@ -3,6 +3,7 @@ import * as request                 from 'ajax-request';
 import { Config, Local }            from '../sdk';
 import { OAuthParameters }          from '../sdk/oauth-type';
 import { OAuthClientInitConfig }    from '../sdk/oauth-type';
+import { QueryParams }              from '../sdk/oauth-http';
 import { TokenResponse }            from '../sdk/oauth-http';
 import { AuthorizationResponse }    from '../sdk/oauth-http';
 
@@ -30,6 +31,7 @@ export class OAuth
     private popup: any = null;
     private usingImplicitGrants: boolean = false;
     private onLogin: Function = () => {};
+    private userApiKey: string;
 
     constructor() { }
 
@@ -50,6 +52,7 @@ export class OAuth
 
     getLoginUrl(params: OAuthParameters)
     {
+        params.is_oauth = 1; // always add a usefull for symfony backend
         params.client_id = this.clientConfig.clientId;
         params.response_type = (params.response_type != null) ? params.response_type : 'code';
 
@@ -57,6 +60,12 @@ export class OAuth
 
         const loginUrl = this.endpoint(OAuth.LOGIN_PATH, params);
         return loginUrl;
+    }
+
+    setUserApiKey(apiKey: string)
+    {
+        this.userApiKey = apiKey;
+        return this;
     }
 
     loading(bool: boolean)
@@ -78,12 +87,27 @@ export class OAuth
         this.dispatchStatusChangeEvent('logout');
     }
 
+    /**
+     * Show either a loggin popup or redirect to authorization
+     * depending if normal auth is used or implicit grants.
+     * When implicit grant are used the auth window will redirect to redirect_uri
+     * with access_token (and rest of response) in a hash tag.
+     * This is why we must parse this hash and simulate the "afterLogin" trigger
+     * otherwised normaly listened to in index.ts manually
+     */
     loginPrompt(params: OAuthParameters, implicitGrants: boolean = false)
     {
         if (implicitGrants === true) {
             this.usingImplicitGrants = true;
             params.response_type = 'token';
+
+            // will skip login screen thanks to symfony APi authenticator guard
+            if (this.userApiKey) {
+                params.api_key = this.userApiKey;
+            }
+
             window.location.href = this.getLoginUrl(params);
+
         } else {
             this.usingImplicitGrants = false;
             this.popup = window.open(this.getLoginUrl(params), '_blank', 'status=0,toolbar=0,height=610,width=540');
@@ -91,7 +115,7 @@ export class OAuth
 
         return this;
     }
-    
+
     afterLogin(method: Function)
     {
         this.onLogin = method;
@@ -99,13 +123,7 @@ export class OAuth
         // @todo To document VS hash VS afterLogin with normal flow !
         if (window.location.hash) {
             // then its a hash response !
-            let data: any = {};
-            const hash = window.location.hash.replace('#', '').split('&');
-
-            for (let pair of hash) {
-                let pr = pair.split('=');
-                data[pr[0]] = pr[1];
-            }
+            let data = QueryParams.getHashQueryParams();
 
             if (typeof(data.token_type !== 'undefined') && data.token_type === 'bearer') {
                 // save local data and blahblah blah
@@ -303,6 +321,7 @@ export class OAuth
         const url = `${this.config.PROTOCOL}://${this.config.DOMAIN}/${path.join('/')}`;
 
         let uris = [];
+
         for (let key in params) {
             if (params.hasOwnProperty(key) && params[key] != null) {
                 uris.push(`${this.toSnakeCase(key)}=${params[key]}`);

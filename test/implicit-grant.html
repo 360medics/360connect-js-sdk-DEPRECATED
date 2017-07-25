@@ -16,19 +16,29 @@
         Connect.OAuth()
             .initialize({ clientId: CLIENT_ID, clientSecret: CLIENT_SECRET, environment: ENV });
 
+        // skip user login if we have his api key passed by the native app
+        // the api changes every time the user logs in and is a ONE time use
+        const userApiKey = Connect.QueryParams().getQueryParam('api_key');
+
         // catch the OAuth implicit response (hashtags!)
         Connect.OAuth().afterLogin(function(/* data*/) {
             Connect.OAuth().getLoginStatus(true).then(response => {
                 console.log(response);
             });
         });
-        
+
         $(function() {
             const params = { state: 'abcd', redirectUri: REDIRECT_URI, scope: SCOPE };
 
             $('#login-button').bind('click', function() {
                 Connect.OAuth().loginPrompt(params, true); // true to require imlicit grant workflow
             });
+            
+            if (null === userApiKey) {
+                $('#error').text('Missing user <api_key> parameter in GET query param.');
+            } else {
+                Connect.OAuth().setUserApiKey(userApiKey);
+            }
         });
     </script>
 </head>
@@ -40,5 +50,6 @@
 
     <p>
         <span id="info"></span>
+        <span id="error" style="color:red"></span>
     </p>
 </body>

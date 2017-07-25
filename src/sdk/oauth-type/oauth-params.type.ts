@@ -11,5 +11,6 @@ export type OAuthParameters = {
     username?: string;
     password?: string;
     grant_type?: 'password'|'client_credentials'|'token'|'authorization_code';
-    [prop: string]: string;
+    userApiKey?: string;
+    [prop: string]: string|number;
 };

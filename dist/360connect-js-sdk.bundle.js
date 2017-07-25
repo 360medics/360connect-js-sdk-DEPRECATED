@@ -2364,7 +2364,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __export(__webpack_require__(24));
 __export(__webpack_require__(29));
 __export(__webpack_require__(30));
-__export(__webpack_require__(59));
+__export(__webpack_require__(61));
 
 
 /***/ }),
@@ -6284,7 +6284,7 @@ var substr = 'ab'.substr(-1) === 'b'
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const sdk_1 = __webpack_require__(6);
-const dom_1 = __webpack_require__(60);
+const dom_1 = __webpack_require__(62);
 const connect = new sdk_1.Connect();
 // create custom shadow DOM elements
 // customElements.define('x-foo', XFooDOMElement);
@@ -6437,7 +6437,8 @@ exports.Local = new LocalModule();
 Object.defineProperty(exports, "__esModule", { value: true });
 const request = __webpack_require__(31);
 const sdk_1 = __webpack_require__(6);
-const oauth_http_1 = __webpack_require__(57);
+const oauth_http_1 = __webpack_require__(58);
+const oauth_http_2 = __webpack_require__(58);
 const GET = 'GET';
 const POST = 'POST';
 /**
@@ -6460,11 +6461,16 @@ class OAuth {
         return this.clientConfig.environment;
     }
     getLoginUrl(params) {
+        params.is_oauth = 1; // always add a usefull for symfony backend
         params.client_id = this.clientConfig.clientId;
         params.response_type = (params.response_type != null) ? params.response_type : 'code';
         this.require(['scope']);
         const loginUrl = this.endpoint(OAuth.LOGIN_PATH, params);
         return loginUrl;
+    }
+    setUserApiKey(apiKey) {
+        this.userApiKey = apiKey;
+        return this;
     }
     loading(bool) {
         if (true === bool) {
@@ -6479,10 +6485,22 @@ class OAuth {
         sdk_1.Local.erase('authorizationTokens');
         this.dispatchStatusChangeEvent('logout');
     }
+    /**
+     * Show either a loggin popup or redirect to authorization
+     * depending if normal auth is used or implicit grants.
+     * When implicit grant are used the auth window will redirect to redirect_uri
+     * with access_token (and rest of response) in a hash tag.
+     * This is why we must parse this hash and simulate the "afterLogin" trigger
+     * otherwised normaly listened to in index.ts manually
+     */
     loginPrompt(params, implicitGrants = false) {
         if (implicitGrants === true) {
             this.usingImplicitGrants = true;
             params.response_type = 'token';
+            // will skip login screen thanks to symfony APi authenticator guard
+            if (this.userApiKey) {
+                params.api_key = this.userApiKey;
+            }
             window.location.href = this.getLoginUrl(params);
         }
         else {
@@ -6496,12 +6514,7 @@ class OAuth {
         // @todo To document VS hash VS afterLogin with normal flow !
         if (window.location.hash) {
             // then its a hash response !
-            let data = {};
-            const hash = window.location.hash.replace('#', '').split('&');
-            for (let pair of hash) {
-                let pr = pair.split('=');
-                data[pr[0]] = pr[1];
-            }
+            let data = oauth_http_1.QueryParams.getHashQueryParams();
             if (typeof (data.token_type !== 'undefined') && data.token_type === 'bearer') {
                 // save local data and blahblah blah
                 sdk_1.Local.save('authorizationTokens', data);
@@ -6559,11 +6572,11 @@ class OAuth {
                 if (res.statusCode === 200) {
                     sdk_1.Local.save('authorizationTokens', data);
                     this.dispatchStatusChangeEvent('authorized');
-                    resolve(new oauth_http_1.TokenResponse(data, res));
+                    resolve(new oauth_http_2.TokenResponse(data, res));
                 }
                 else {
                     this.dispatchStatusChangeEvent('unauthorized');
-                    resolve(new oauth_http_1.TokenResponse(data, res));
+                    resolve(new oauth_http_2.TokenResponse(data, res));
                 }
             });
         });
@@ -6584,11 +6597,11 @@ class OAuth {
                 const data = JSON.parse(body);
                 if (res.statusCode === 200) {
                     this.dispatchStatusChangeEvent('authorized');
-                    resolve(new oauth_http_1.TokenResponse(data, res));
+                    resolve(new oauth_http_2.TokenResponse(data, res));
                 }
                 else {
                     this.dispatchStatusChangeEvent('unauthorized');
-                    resolve(new oauth_http_1.TokenResponse(data, res));
+                    resolve(new oauth_http_2.TokenResponse(data, res));
                 }
             });
         });
@@ -6609,10 +6622,10 @@ class OAuth {
         return new Promise((resolve, reject) => {
             request(url, (err, res, body) => {
                 if (res.statusCode === 200) {
-                    resolve(new oauth_http_1.TokenResponse(JSON.parse(body), res));
+                    resolve(new oauth_http_2.TokenResponse(JSON.parse(body), res));
                 }
                 else {
-                    resolve(new oauth_http_1.TokenResponse(JSON.parse(body), res));
+                    resolve(new oauth_http_2.TokenResponse(JSON.parse(body), res));
                 }
             });
         });
@@ -6628,7 +6641,7 @@ class OAuth {
             const data = sdk_1.Local.retrieve('loginStatus');
             if (data != null) {
                 // dispatch change on the user, the LoginButton listens to this
-                return Promise.resolve(new oauth_http_1.TokenResponse(data, { statusCode: 200 }));
+                return Promise.resolve(new oauth_http_2.TokenResponse(data, { statusCode: 200 }));
             }
         }
         else {
@@ -6648,7 +6661,7 @@ class OAuth {
                 sdk_1.Local.save('loginStatus', data);
                 // dispatch change on the user, the LoginButton listens to this
                 this.dispatchStatusChangeEvent('login');
-                resolve(new oauth_http_1.TokenResponse(data, res));
+                resolve(new oauth_http_2.TokenResponse(data, res));
             });
         });
     }
@@ -10122,7 +10135,8 @@ function fileMatch(filter, ignore) {
 module.exports = fileMatch;
 
 /***/ }),
-/* 57 */
+/* 57 */,
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10131,11 +10145,63 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(58));
+__export(__webpack_require__(59));
+__export(__webpack_require__(60));
 
 
 /***/ }),
-/* 58 */
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Get, find, handles GET query parameters or hash params.
+ */
+class QueryParamsModule {
+    constructor() {
+        this.queryParams = {};
+        this.hashQueryParams = {};
+        if (window.location.search) {
+            const uriString = location.search.replace('?', ''); // remove the "?"
+            this.queryParams = this.extractParams(uriString);
+        }
+        if (window.location.hash) {
+            const uriString = location.hash.replace('#', ''); // remove the "#"
+            this.hashQueryParams = this.extractParams(uriString);
+        }
+    }
+    extractParams(stringUri) {
+        let params = {};
+        const queryParts = stringUri.split('&');
+        for (let part of queryParts) {
+            let pair = part.split('=');
+            if (pair.length === 2) {
+                params[pair[0]] = pair[1];
+            }
+        }
+        return params;
+    }
+    getQueryParams() {
+        return this.queryParams;
+    }
+    getQueryParam(name) {
+        return (typeof this.queryParams[name] === 'undefined') ? null : this.queryParams[name];
+    }
+    getHashQueryParams() {
+        return this.hashQueryParams;
+    }
+    getHashQueryParam(name) {
+        return (typeof this.hashQueryParams[name] === 'undefined') ? null : this.hashQueryParams[name];
+    }
+}
+exports.QueryParamsModule = QueryParamsModule;
+exports.QueryParams = new QueryParamsModule();
+
+
+/***/ }),
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10175,19 +10241,23 @@ exports.AuthorizationResponse = AuthorizationResponse;
 
 
 /***/ }),
-/* 59 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const sdk_1 = __webpack_require__(6);
+const oauth_http_1 = __webpack_require__(58);
 /**
  * Main wrapper 360 connect class.
  */
 class Connect {
     constructor() {
         this.oauth = new sdk_1.OAuth();
+    }
+    QueryParams() {
+        return oauth_http_1.QueryParams;
     }
     OAuth() {
         return this.oauth;
@@ -10197,7 +10267,7 @@ exports.Connect = Connect;
 
 
 /***/ }),
-/* 60 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10206,11 +10276,11 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(61));
+__export(__webpack_require__(63));
 
 
 /***/ }),
-/* 61 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10237,7 +10307,7 @@ class LoginButton extends HTMLElement {
             imgSrc = `${domain}${user.avatar}`;
             btnText = user.surname;
         }
-        this.loaderDataUri = __webpack_require__(62);
+        this.loaderDataUri = __webpack_require__(64);
         // slot is a placeholder for user custom text inside the custom element markup
         // slot can also be replaced by text using "this.textContent"
         const shadowRoot = this.attachShadow({ mode: 'open' });
@@ -10361,7 +10431,7 @@ exports.LoginButton = LoginButton;
 
 
 /***/ }),
-/* 62 */
+/* 64 */
 /***/ (function(module, exports) {
 
 module.exports = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzBweCIgIGhlaWdodD0iMzBweCIgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIiBjbGFzcz0ibGRzLXJpcHBsZSI+CiAgICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSIzNS40MjE0IiBmaWxsPSJub25lIiBuZy1hdHRyLXN0cm9rZT0ie3tjb25maWcuYzF9fSIgbmctYXR0ci1zdHJva2Utd2lkdGg9Int7Y29uZmlnLndpZHRofX0iIHN0cm9rZT0iI2Q1MjEwYSIgc3Ryb2tlLXdpZHRoPSI0Ij4KICAgICAgPGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgY2FsY01vZGU9InNwbGluZSIgdmFsdWVzPSIwOzQwIiBrZXlUaW1lcz0iMDsxIiBkdXI9IjEuNSIga2V5U3BsaW5lcz0iMCAwLjIgMC44IDEiIGJlZ2luPSItMC43NXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIj48L2FuaW1hdGU+CiAgICAgIDxhbmltYXRlIGF0dHJpYnV0ZU5hbWU9Im9wYWNpdHkiIGNhbGNNb2RlPSJzcGxpbmUiIHZhbHVlcz0iMTswIiBrZXlUaW1lcz0iMDsxIiBkdXI9IjEuNSIga2V5U3BsaW5lcz0iMC4yIDAgMC44IDEiIGJlZ2luPSItMC43NXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIj48L2FuaW1hdGU+CiAgICA8L2NpcmNsZT4KICAgIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjE2LjgwNzYiIGZpbGw9Im5vbmUiIG5nLWF0dHItc3Ryb2tlPSJ7e2NvbmZpZy5jMn19IiBuZy1hdHRyLXN0cm9rZS13aWR0aD0ie3tjb25maWcud2lkdGh9fSIgc3Ryb2tlPSIjZjE4ZDAxIiBzdHJva2Utd2lkdGg9IjQiPgogICAgICA8YW5pbWF0ZSBhdHRyaWJ1dGVOYW1lPSJyIiBjYWxjTW9kZT0ic3BsaW5lIiB2YWx1ZXM9IjA7NDAiIGtleVRpbWVzPSIwOzEiIGR1cj0iMS41IiBrZXlTcGxpbmVzPSIwIDAuMiAwLjggMSIgYmVnaW49IjBzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSI+PC9hbmltYXRlPgogICAgICA8YW5pbWF0ZSBhdHRyaWJ1dGVOYW1lPSJvcGFjaXR5IiBjYWxjTW9kZT0ic3BsaW5lIiB2YWx1ZXM9IjE7MCIga2V5VGltZXM9IjA7MSIgZHVyPSIxLjUiIGtleVNwbGluZXM9IjAuMiAwIDAuOCAxIiBiZWdpbj0iMHMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIj48L2FuaW1hdGU+CiAgICA8L2NpcmNsZT4KICA8L3N2Zz4=\n"
