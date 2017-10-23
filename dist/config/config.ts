@@ -27,11 +27,11 @@ export class ConfigModule
             environment == null
             || ['dev', 'staging', 'prod'].indexOf(environment) === -1
         ) {
-            throw new Error('Parameter "environment" is required when initializing app and must be "dev|staging|prod"');
+            throw new Error('@360connect: parameter "environment" is required when initializing app and must be "dev|staging|prod"');
         }
 
         if (environment === 'dev') {
-            console.warn(`You are using the "dev" environment which is meant to be for local development only. If you are a developer use "staging" instead.`);
+            console.warn(`@360connect: you are using the "dev" environment which is meant to be for local development only. If you are a developer use "staging" instead.`);
         }
 
         this.environment = environment;

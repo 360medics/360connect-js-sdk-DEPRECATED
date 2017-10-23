@@ -1,7 +1,10 @@
 export type OAuthClientInitConfig = {
+    flow: string;
     clientId: string;
     environment: 'dev'|'staging'|'prod';
     clientSecret?: string;
+    package?: string;
+    version?: string;
 };
 
 export type OAuthParameters = {

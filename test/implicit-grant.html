@@ -12,9 +12,9 @@
         const CLIENT_SECRET = '6cmwgzlkgx0kg4wkcs4gk0o0owgc80k44cs0cc8g8sgko40ckc';
         const REDIRECT_URI = 'http://oauth-demos.dev/test/implicit-grant.html';
         const SCOPE = 'anon_scope';
-
+        
         Connect.OAuth()
-            .initialize({ clientId: CLIENT_ID, clientSecret: CLIENT_SECRET, environment: ENV });
+            .initialize({ clientId: CLIENT_ID, clientSecret: CLIENT_SECRET, environment: ENV, flow: Connect.OAuth().IMPLICIT_FLOW });
 
         // skip user login if we have his api key passed by the native app
         // the api changes every time the user logs in and is a ONE time use
@@ -31,9 +31,9 @@
             const params = { state: 'abcd', redirectUri: REDIRECT_URI, scope: SCOPE };
 
             $('#login-button').bind('click', function() {
-                Connect.OAuth().loginPrompt(params, true); // true to require imlicit grant workflow
+                Connect.OAuth().login(params); // true to require imlicit grant workflow
             });
-            
+
             if (null === userApiKey) {
                 $('#error').text('Missing user <api_key> parameter in GET query param.');
             } else {

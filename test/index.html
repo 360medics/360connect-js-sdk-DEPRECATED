@@ -12,8 +12,9 @@
         const CLIENT_ID = '1_2kazv0v7xrs444kcgss044s080o80w84co8o0coc0cg4ko0okc';
         const CLIENT_SECRET = '6cmwgzlkgx0kg4wkcs4gk0o0owgc80k44cs0cc8g8sgko40ckc';
         const REDIRECT_URI = 'http://360medical.dev/oauth/v2/auth_login_success';
+        // const REDIRECT_URI = 'http://hosto-bombasses.dev/index.html';
         const SCOPE = 'full_scope';
-        
+
         Connect.initialize({
             clientId: CLIENT_ID,
             clientSecret: CLIENT_SECRET,
@@ -29,6 +30,7 @@
             // set what should be done after login (save tokens on your end maybe?)
             Connect.OAuth().afterLogin(function(data) {
                 // console.log(data.code, data.state);
+                
                 Connect.OAuth().requestAuthorizationCode({ code: data.code, redirectUri: REDIRECT_URI, scope: SCOPE }).then(function(response) {
                     // console.log(Connect.OAuth().getAccessToken());
                     Connect.OAuth().getLoginStatus(true).then(response => {
@@ -73,15 +75,14 @@
 </head>
 <body>
 
-    <div>
-        <login-button id="login-button"></login-button>
-    </div>
-
     <div id="if-logged-in" style="display:none">
         <p>You are logged in as <span id="info"></span></p>
         <p><a href="#" id="logout-button">Logout</a></p>
     </div>
     <div id="if-logged-out">
         <p>You are logged out</p>
+        <div>
+            <login-button id="login-button"></login-button>
+        </div>
     </div>
 </body>

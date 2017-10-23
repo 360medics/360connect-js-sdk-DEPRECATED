@@ -1,6 +1,6 @@
-declare var window: any;
+import * as mixpanel from 'mixpanel-browser';
 import * as request                 from 'ajax-request';
-import { Config, Local }            from '../sdk';
+import { Connect, Config, Local }   from '../sdk';
 import { OAuthParameters }          from '../sdk/oauth-type';
 import { OAuthClientInitConfig }    from '../sdk/oauth-type';
 import { QueryParams }              from '../sdk/oauth-http';
@@ -23,25 +23,27 @@ export class OAuth
     public static TOKEN_PATH = ['oauth', 'v2', 'token'];       // rest/oauth/v2/token
     public static LOGIN_PATH = ['oauth', 'v2', 'auth'];
 
+    public IMPLICIT_FLOW = 'implicit';
+    public PASSWORD_FLOW = 'password';
+    public CLIENT_CREDENTIALS_FLOW = 'client_credentials';
+    public AUTHORIZATION_FLOW = 'authorization_code';
+
     public static ANON_SCOPE = 'anon_scope';
     public static REDUCED_SCOPE = 'reduced_scope';
     public static FULL_SCOPE = 'full_scope';
     public static DEFAULT_SCOPE = 'anon_scope';
 
     private popup: any = null;
-    private usingImplicitGrants: boolean = false;
     private onLogin: Function = () => {};
-    private userApiKey: string;
+    private userApiKey: string = null;
 
-    constructor() { }
+    constructor() {}
 
     initialize(clientConfig: OAuthClientInitConfig)
     {
-        Config.init(clientConfig.environment);
-
         this.config = Config.getConfig()['api'];
         this.clientConfig = clientConfig;
-
+        this.clientConfig.flow = (typeof this.clientConfig.flow === 'undefined') ? this.AUTHORIZATION_FLOW : this.clientConfig.flow;
         return this;
     }
 
@@ -50,13 +52,38 @@ export class OAuth
         return this.clientConfig.environment;
     }
 
+    /**
+     * The login url can vary from a classic authorization mode (client secret is not needed)
+     * and a implicit mode where client secret is neede (see FOSOAuthServerBundle requires it)
+     *
+     * A few more params for the backend are also passed (oauth to 1), and an optional
+     * user api key to skip login if valid (using the symfony api key guard authenticator)
+     */
     getLoginUrl(params: OAuthParameters)
     {
-        params.is_oauth = 1; // always add a usefull for symfony backend
-        params.client_id = this.clientConfig.clientId;
-        params.response_type = (params.response_type != null) ? params.response_type : 'code';
-
+        // least requirements
         this.require(['scope']);
+
+        // ever needed parameters
+        params.is_oauth = 1; // always add a usefull for symfony backend
+        params.clientId = this.clientConfig.clientId;
+        params.clientSecret = this.clientConfig.clientSecret;
+
+        // response type vaires depending on oauth mode
+        if (this.clientConfig.flow === this.AUTHORIZATION_FLOW) {
+            params.response_type = 'code';
+
+        } else if (this.clientConfig.flow === this.IMPLICIT_FLOW) {
+            params.response_type = 'token';
+        } else {
+            throw new Error(`@360connect: invalid value for flow when building login url`);
+        }
+
+        // optional skip login window using our
+        // backend guard api key authenticator
+        if (null !== this.userApiKey) {
+            params.api_key = this.userApiKey;
+        }
 
         const loginUrl = this.endpoint(OAuth.LOGIN_PATH, params);
         return loginUrl;
@@ -95,21 +122,19 @@ export class OAuth
      * This is why we must parse this hash and simulate the "afterLogin" trigger
      * otherwised normaly listened to in index.ts manually
      */
-    loginPrompt(params: OAuthParameters, implicitGrants: boolean = false)
+    login(params: OAuthParameters)
     {
-        if (implicitGrants === true) {
-            this.usingImplicitGrants = true;
-            params.response_type = 'token';
+        // a different url will be build depending on the oauth
+        // grant mode chosen (can be authorization code or implicit at this point)
+        const loginUrl = this.getLoginUrl(params);
 
-            // will skip login screen thanks to symfony APi authenticator guard
-            if (this.userApiKey) {
-                params.api_key = this.userApiKey;
-            }
-
+        // if we are using a normal popup mode (for the web)
+        // just trigger a popup with the authorization page
+        // else redirect when using implicit grants
+        if (this.clientConfig.flow === this.IMPLICIT_FLOW) {
             window.location.href = this.getLoginUrl(params);
 
         } else {
-            this.usingImplicitGrants = false;
             this.popup = window.open(this.getLoginUrl(params), '_blank', 'status=0,toolbar=0,height=610,width=540');
         }
 
@@ -120,8 +145,9 @@ export class OAuth
     {
         this.onLogin = method;
 
-        // @todo To document VS hash VS afterLogin with normal flow !
-        if (window.location.hash) {
+        // when using implicit grants access token is returned as a query string behing
+        // a hashtag url (implicit flow is specificaly designed for single page web apps)
+        if (window.location.hash && this.clientConfig.flow === this.IMPLICIT_FLOW) {
             // then its a hash response !
             let data = QueryParams.getHashQueryParams();
 
@@ -139,6 +165,7 @@ export class OAuth
 
     afterPopup(e: any)
     {
+        // @todo Popup on close does not trigger the next event
         if (this.popup !== null) {
             this.popup.close();
             this.popup = null;
@@ -186,10 +213,10 @@ export class OAuth
     requestAuthorizationCode(params: OAuthParameters): Promise<TokenResponse>
     {
         params.grant_type = 'authorization_code';
-        params.clientId = this.clientConfig.clientId;
-        params.clientSecret = this.clientConfig.clientSecret;
+        params.client_id = this.clientConfig.clientId;
+        params.client_secret = this.clientConfig.clientSecret;
 
-        this.require(['scope']);
+        this.require(['scope', 'grant_type']);
 
         const url = this.endpoint(OAuth.TOKEN_PATH, params);
 
@@ -221,10 +248,10 @@ export class OAuth
     requestPasswordGrants(params: OAuthParameters): Promise<TokenResponse>
     {
         params.grant_type = 'password';
-        params.clientId = this.clientConfig.clientId
-        params.clientSecret = this.clientConfig.clientSecret;
+        params.client_id = this.clientConfig.clientId;
+        params.client_secret = this.clientConfig.clientSecret;
 
-        this.require(['username', 'password', 'scope']);
+        this.require(['username', 'password', 'scope', 'grant_type']);
 
         const url = this.endpoint(OAuth.TOKEN_PATH, params);
 
@@ -244,35 +271,6 @@ export class OAuth
     }
 
     /**
-     * Request implicit grants
-     * http://oauthlib.readthedocs.io/en/latest/oauth2/grants/implicit.html
-     * @todo Might be removed in the future if its not safe.
-     * @deprecated
-     */
-    requestImplicitGrants(params: OAuthParameters): Promise<TokenResponse>
-    {
-        console.warn(`Requesting implicit grants is not recommended and will be decprecated.`);
-
-        params.response_type = 'token';
-        params.clientId = this.clientConfig.clientId
-        params.clientSecret = this.clientConfig.clientSecret;
-
-        // this.require(['username', 'password', 'scope']);
-
-        const url = this.endpoint(OAuth.TOKEN_PATH, params);
-
-        return new Promise((resolve, reject) => {
-            request(url, (err, res, body) => {
-                if (res.statusCode === 200) {
-                    resolve(new TokenResponse(JSON.parse(body), res));
-                } else {
-                    resolve(new TokenResponse(JSON.parse(body), res));
-                }
-            });
-        });
-    }
-
-    /**
      * Get login status from Oauth protected API endpoint.
      */
     getLoginStatus(refresh: boolean = false): Promise<TokenResponse>
@@ -286,6 +284,7 @@ export class OAuth
 
             if (data != null) {
                 // dispatch change on the user, the LoginButton listens to this
+                this.tryToIdentifyProfile(data.user);
                 return Promise.resolve(new TokenResponse(data, { statusCode: 200 }));
             }
 
@@ -301,6 +300,7 @@ export class OAuth
 
                 if (res.statusCode === 200) {
                     data = JSON.parse(body);
+                    this.tryToIdentifyProfile(data.user);
                 } else {
                     // see APi endpoints server side
                     data = { status: 'unkown', user: null };
@@ -335,8 +335,6 @@ export class OAuth
     /**
      * Save access token and refresh token in the cache after success
      * Dispatch change status event for login/button or other UI stuff.
-     *
-     *
      */
     private onAuthSuccess(eventName: string, jsonAuthResData: any)
     {
@@ -389,6 +387,18 @@ export class OAuth
     {
         return {
             'Content-Type': 'application/json; charset=utf-8',
+        }
+    }
+
+    private tryToIdentifyProfile(userData: any)
+    {
+        if (null == userData) { return; }
+
+        // full or reduced scopes
+        if (typeof userData.email !== 'undefined') {
+            mixpanel.identify(userData.email);
+        } else {
+            // anonymous scope, no one to identify oralias
         }
     }
 }
