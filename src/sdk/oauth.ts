@@ -155,8 +155,6 @@ export class OAuth
                 // then its a hash response !
                 let data = QueryParams.getHashQueryParams()
 
-                console.log(data)
-
                 if (typeof(data.token_type !== 'undefined') && data.token_type === 'bearer') {
                     // save local data and blahblah blah
                     Local.save('authorizationTokens', data)
@@ -261,7 +259,7 @@ export class OAuth
             });
         });
     }
-    
+
     /**
      * Request password grant type for use in mobile apps mainly.
      *
