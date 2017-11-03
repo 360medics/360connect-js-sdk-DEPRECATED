@@ -16,13 +16,16 @@ export class Connect
     protected package: string = null;
     protected version: string = null;
 
-    constructor(){}
+    IMPLICIT_FLOW: string = null;
+    PASSWORD_FLOW: string = null;
+    CLIENT_CREDENTIALS_FLOW: string = null;
+    AUTHORIZATION_FLOW: string = null;
 
     initialize(clientConfig: OAuthClientInitConfig)
     {
         Config.init(clientConfig.environment);
         this.mixpanelConfig = Config.getConfig()['mixpanel'];
-
+        
         this.oauth = new OAuth();
         this.oauth.initialize(clientConfig);
 
@@ -65,6 +68,10 @@ export class Connect
         // a few safeguards
         if (this.oauth.getUser() === null || parseInt(this.oauth.getUser().id) === 0) {
             throw new Error(`@360connect: tracking an event failed because not user id was provided\nYou should consider tracking events after successfull login`);
+        }
+        if (false === this.trackingEnabled) {
+            console.warn(`@360connect: Tracking is disabled by default. You should explicitely use Connect.enableTracking()`)
+            return;
         }
 
         eventName = `webapp.${eventName}`;

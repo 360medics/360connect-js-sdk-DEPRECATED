@@ -1,7 +1,7 @@
 {
     "api": {
         "PROTOCOL": "https",
-        "DOMAIN": "360medical.com"
+        "DOMAIN": "360medics.com"
     },
     "mixpanel": {
         "token": ""

@@ -51,7 +51,7 @@ export class LoginButton extends HTMLElement
             // e.detail.status is "login|loading"
             this.updateButton(e.detail.status, e.detail.user, imgNode);
         });
-        
+
         this.addEventListener('click', e => {
             this.onClick(e);
         });
@@ -118,7 +118,7 @@ export class LoginButton extends HTMLElement
     {
         return `
             :host {
-                display: flex;
+                display: inline-block;
             }
 
             :host > .connect-btn {
