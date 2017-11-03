@@ -12126,7 +12126,6 @@ class OAuth {
             if (window.location.hash) {
                 // then its a hash response !
                 let data = oauth_http_1.QueryParams.getHashQueryParams();
-                console.log(data);
                 if (typeof (data.token_type !== 'undefined') && data.token_type === 'bearer') {
                     // save local data and blahblah blah
                     sdk_1.Local.save('authorizationTokens', data);
