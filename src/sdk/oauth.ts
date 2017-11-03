@@ -10,6 +10,13 @@ import { AuthorizationResponse }    from '../sdk/oauth-http';
 const GET = 'GET';
 const POST = 'POST';
 
+export let OAuthFlows = {
+    IMPLICIT_FLOW: 'implicit',
+    PASSWORD_FLOW: 'password',
+    CLIENT_CREDENTIALS_FLOW: 'client_credentials',
+    AUTHORIZATION_FLOW: 'authorization_code',
+}
+
 /**
  * Main wrapper 360 connect class.
  */
@@ -22,11 +29,6 @@ export class OAuth
     public static AUTH_PATH = ['oauth', 'v2', 'auth'];         // rest/oauth/v2/auth
     public static TOKEN_PATH = ['oauth', 'v2', 'token'];       // rest/oauth/v2/token
     public static LOGIN_PATH = ['oauth', 'v2', 'auth'];
-
-    public IMPLICIT_FLOW = 'implicit';
-    public PASSWORD_FLOW = 'password';
-    public CLIENT_CREDENTIALS_FLOW = 'client_credentials';
-    public AUTHORIZATION_FLOW = 'authorization_code';
 
     public static ANON_SCOPE = 'anon_scope';
     public static REDUCED_SCOPE = 'reduced_scope';
@@ -43,7 +45,7 @@ export class OAuth
     {
         this.config = Config.getConfig()['api'];
         this.clientConfig = clientConfig;
-        this.clientConfig.flow = (typeof this.clientConfig.flow === 'undefined') ? this.AUTHORIZATION_FLOW : this.clientConfig.flow;
+        this.clientConfig.flow = (typeof this.clientConfig.flow === 'undefined') ? OAuthFlows.AUTHORIZATION_FLOW : this.clientConfig.flow;
         return this;
     }
 
@@ -59,7 +61,7 @@ export class OAuth
      * A few more params for the backend are also passed (oauth to 1), and an optional
      * user api key to skip login if valid (using the symfony api key guard authenticator)
      */
-    getLoginUrl(params: OAuthParameters)
+    getLoginUrl(params: OAuthParameters = null)
     {
         // least requirements
         this.require(['scope']);
@@ -69,11 +71,11 @@ export class OAuth
         params.clientId = this.clientConfig.clientId;
         params.clientSecret = this.clientConfig.clientSecret;
 
-        // response type vaires depending on oauth mode
-        if (this.clientConfig.flow === this.AUTHORIZATION_FLOW) {
+        // response type varies depending on oauth mode
+        if (this.clientConfig.flow === OAuthFlows.AUTHORIZATION_FLOW) {
             params.response_type = 'code';
 
-        } else if (this.clientConfig.flow === this.IMPLICIT_FLOW) {
+        } else if (this.clientConfig.flow === OAuthFlows.IMPLICIT_FLOW) {
             params.response_type = 'token';
         } else {
             throw new Error(`@360connect: invalid value for flow when building login url`);
@@ -85,8 +87,7 @@ export class OAuth
             params.api_key = this.userApiKey;
         }
 
-        const loginUrl = this.endpoint(OAuth.LOGIN_PATH, params);
-        return loginUrl;
+        return this.endpoint(OAuth.LOGIN_PATH, params);
     }
 
     setUserApiKey(apiKey: string)
@@ -131,7 +132,7 @@ export class OAuth
         // if we are using a normal popup mode (for the web)
         // just trigger a popup with the authorization page
         // else redirect when using implicit grants
-        if (this.clientConfig.flow === this.IMPLICIT_FLOW) {
+        if (this.clientConfig.flow === OAuthFlows.IMPLICIT_FLOW) {
             window.location.href = this.getLoginUrl(params);
 
         } else {
@@ -145,18 +146,39 @@ export class OAuth
     {
         this.onLogin = method;
 
-        // when using implicit grants access token is returned as a query string behing
-        // a hashtag url (implicit flow is specificaly designed for single page web apps)
-        if (window.location.hash && this.clientConfig.flow === this.IMPLICIT_FLOW) {
-            // then its a hash response !
-            let data = QueryParams.getHashQueryParams();
+        if (this.clientConfig.flow === OAuthFlows.IMPLICIT_FLOW) {
 
-            if (typeof(data.token_type !== 'undefined') && data.token_type === 'bearer') {
-                // save local data and blahblah blah
-                Local.save('authorizationTokens', data);
-                this.dispatchStatusChangeEvent('authorized');
-                data.origin = '_360connect';
-                this.afterPopup({ data: data });
+            // when using implicit grants access token is returned as a query string (probably behind
+            // a hashtag url) (implicit flow is specificaly designed for single page web apps)
+            if (window.location.hash) {
+
+                // then its a hash response !
+                let data = QueryParams.getHashQueryParams()
+
+                console.log(data)
+
+                if (typeof(data.token_type !== 'undefined') && data.token_type === 'bearer') {
+                    // save local data and blahblah blah
+                    Local.save('authorizationTokens', data)
+                    this.dispatchStatusChangeEvent('authorized')
+                    data.origin = '_360connect';
+                    this.afterPopup({ data: data });
+                    window.location.hash = null;
+                }
+
+            } else {
+
+                // case when there is not hashtag but still return query params after login
+                const data = QueryParams.getQueryParams()
+
+                if (typeof data.code !== 'undefined') {
+                    Local.save('authorizationTokens', data)
+                    Local.save('authorizationTokens', data)
+                    this.dispatchStatusChangeEvent('authorized')
+                    data.origin = '_360connect';
+                    this.afterPopup({ data: data });
+                    window.location.search = '';
+                }
             }
         }
 
@@ -239,7 +261,7 @@ export class OAuth
             });
         });
     }
-
+    
     /**
      * Request password grant type for use in mobile apps mainly.
      *
@@ -247,6 +269,7 @@ export class OAuth
      */
     requestPasswordGrants(params: OAuthParameters): Promise<TokenResponse>
     {
+        console.warn(`@360connect: OAuth flow with password grants requests is NOT STABLE yet and should NOT BE USED IN PRODUCTION`)
         params.grant_type = 'password';
         params.client_id = this.clientConfig.clientId;
         params.client_secret = this.clientConfig.clientSecret;

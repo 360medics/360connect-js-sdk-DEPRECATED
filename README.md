@@ -27,7 +27,7 @@ Import the SDK js bundle into your HTML page (see also example in `web-login-dem
 
 ### Configuration
 
-Configure the SDK with your API keys and client credentials. Choose `ENV=staging` for the sandbox (`beta.360medical.fr`).
+Configure the SDK with your API keys and client credentials. Choose `ENV=staging` for the sandbox (`beta.360medical.com`).
 
 See also (notes about security in single page applications)[#security].
 
@@ -35,7 +35,7 @@ See also (notes about security in single page applications)[#security].
 const ENV = 'staging';
 const CLIENT_ID = '<MY_CLIENT_ID>';
 const CLIENT_SECRET = '<MY_CLIENT_SECRET>';
-const REDIRECT_URI = 'http://beta.360medical.fr/oauth/v2/auth_login_success'; // to enable the web popup
+const REDIRECT_URI = 'http://beta.360medical.com/oauth/v2/auth_login_success'; // to enable the web popup
 const SCOPE = 'anon_scope'; // choose a scope 'anon_scope|reduced_scope|full_scope'
 
 // initialize the SDK

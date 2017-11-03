@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>360Connect JS SDK - Implicit Grant</title>
+    <title>360Connect JS SDK - Implicit Grant with API key</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
     <script src="../dist/360connect-js-sdk.bundle.js"></script>
-    <style type="text/css">body { padding: 8px 16px }</style>
+    <style type="text/css">body { padding: 8px 16px } #error { color: red }</style>
 
     <script>
         // client side code !
         const ENV = 'dev';
         const CLIENT_ID = '1_2kazv0v7xrs444kcgss044s080o80w84co8o0coc0cg4ko0okc';
         const CLIENT_SECRET = '6cmwgzlkgx0kg4wkcs4gk0o0owgc80k44cs0cc8g8sgko40ckc';
-        const REDIRECT_URI = 'http://360connect-demo.dev/implicit-grant.html';
+        const REDIRECT_URI = 'http://360connect-demo.dev/implicit-grant-and-apikey.html';
         const SCOPE = 'full_scope';
 
         Connect.initialize({
@@ -23,6 +23,9 @@
             version: '0.3.2',
             flow: Connect.IMPLICIT_FLOW,
         });
+
+        // retrieve user API key from GET parameter
+        const userApiKey = Connect.QueryParams().getQueryParam('api_key');
 
         // just for the demos
         function updateUi(loggedIn, user = null) {
@@ -39,6 +42,15 @@
         const oauthParams = { state: 'KustomVerifToken', redirectUri: REDIRECT_URI, scope: SCOPE };
 
         $(function() {
+            if (null === userApiKey) {
+                $('#error').text('Missing user <api_key> parameter in GET query param.');
+            } else {
+                // will by pass the login screen IF and only IF the api key is valid and not expired
+                // only native apps like 360medics (iOS or Android) can provide that for you.
+                // and api keys are one time use only. once you logged in, BAM ! Finished...
+                Connect.OAuth().setUserApiKey(userApiKey);
+            }
+
             // show login url for the user
             const loginUrl = Connect.OAuth().getLoginUrl(oauthParams)
 
@@ -64,7 +76,7 @@
 
             // use true to force a new http request to get login status and user
             // remove true and you'll get data from the cache (which can be usefull)
-            Connect.OAuth().getLoginStatus().then(response => {
+            Connect.OAuth().getLoginStatus(true).then(response => {
                 if (response.statusCode === 200 && response.status === 'connected') {
                     // now you can get the user
                     // response.user
@@ -76,7 +88,8 @@
                     updateUi(true, response.user)
                 } else {
                     // send to authorization page (might require login or beeing logged)
-                    // Connect.OAuth().login(oauthParams, true);
+                    // magic for the user happends here!!
+                    // Connect.OAuth().login(oauthParams, true)
                     updateUi(false)
                 }
             });
@@ -84,6 +97,8 @@
     </script>
 </head>
 <body>
+    <p id="error"></p>
+
     <div id="if-logged-in" style="display:none">
         <p>You are logged in as <span id="info"></span></p>
         <p><a href="#" id="logout-button">Logout</a></p>
