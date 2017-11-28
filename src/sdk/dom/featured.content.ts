@@ -3,65 +3,41 @@
  * https://developers.google.com/web/fundamentals/web-components/customelements
  */
 import { Config, Local } from '../../sdk';
-// import * as LogoSvg from '../../assets/ripple.svg';
-// import txt from 'raw-loader!./../../assets/ripple-data-uri.txt';
 
-/**
- * Custom HTML element button.
- */
-export class LoginButton extends HTMLElement
+export class FeaturedContent extends HTMLElement
 {
-    private loaderDataUri: string;
-    private colors: any = {
-        white: '#f1f1f1',
-        primary: '#CC2B18',
-        primaryHover: '#bd2816'
-    }
+    width: number = 410;
+    widthPx: string = `${this.width}px`;
+    animSpeed: '0.5s';
+    contentDOM: HTMLElement;
 
     // monitor the "user" attribute for changes.
     static get observedAttributes() {return ['username']; }
 
-    constructor()
-    {
+    constructor() {
         super();
 
-        const config = Config.getConfig()['api'];
-        const domain = `${config.PROTOCOL}://${config.DOMAIN}`;
-        const data = Local.retrieve('loginStatus');
-        const user = (data == null) ? null : data.user;
-
-        let imgSrc = this.logoUri();
-        let btnText = '360 Connect';
-
-        if (user !== null) {
-            if (typeof(user.avatar) !== 'undefined') {
-                imgSrc = `${domain}${user.avatar}`;
-            }
-            btnText = user.surname;
-        }
-
-        this.loaderDataUri = require('../../assets/ripple-data-uri.txt');
+        let logoSrc = this.logoUri();
 
         // slot is a placeholder for user custom text inside the custom element markup
         // slot can also be replaced by text using "this.textContent"
         const shadowRoot = this.attachShadow({ mode: 'open' });
+
         shadowRoot.innerHTML = `<style>${this.cssStyles()}</style>
-            <div class="connect-btn">
-                <div class="inner">
-                    <span class="logo">
-                        <img src="${imgSrc}" height="23" width="23" />
-                    </span>
-                <span class="text"><slot>${btnText}</slot></span>
+            <div class="connect-featured" id="connect-featured-01">
+                <div class="inner"></div>
+                <div class="footer">
+                    <img src="${logoSrc}" height="23" width="23" /> by 360medics
                 </div>
             </div>
         `;
 
-        // this relies/depends uniquely on HTML markup above
-        let imgNode: any = shadowRoot.childNodes[2].childNodes[1].childNodes[1].childNodes[1];
+        let innerNode: any = shadowRoot.childNodes[2].childNodes[1];
+        this.contentDOM = shadowRoot.getElementById('connect-featured-01')
 
-        window.addEventListener('status:change', (e: CustomEvent) => {
+        window.addEventListener('content:change', (e: CustomEvent) => {
             // e.detail.status is "login|loading"
-            this.updateButton(e.detail.status, e.detail.user, imgNode);
+            this.updateContent(e.detail.advert, innerNode)
         });
 
         this.addEventListener('click', e => {
@@ -69,50 +45,34 @@ export class LoginButton extends HTMLElement
         });
     }
 
-    get username()
-    {
-        return this.getAttribute('username');
-    }
-
-    set username(username: any)
-    {
-        this.setAttribute('username', username);
-    }
-
-    // called whenever the custom element is removed from the DOM.
+    // called whenever the custom element is added from the DOM.
+    // this does not seem to work AT ALL (multiple tests performed and despite docmentation)
     connectedCallback() {
-        // const data = Local.retrieve('getLoginStatus');
-        // const user = (data === null) ? null : data.user;
-        // this.textContent = (user === null) ? '360 Connect' : `Bonjour ${user.surname}`;
+
     }
 
     // called whenever an attribute is added, removed or updated
     // only attributes listed in the observedAttributes property are affected.
     attributeChangedCallback(attr, oldValue, newValue)
     {
-        // if (attr === 'username') {
-        //     this.textContent = `Bonjour ${newValue}`;
-        // }
-    }
-    
-    updateButton(status: string, user: any, imgNode)
-    {
-        const config = Config.getConfig()['api'];
-        const domain = `${config.PROTOCOL}://${config.DOMAIN}`;
 
-        if (status === 'loading') {
-            imgNode.src = this.loaderDataUri;
-        } else {
-            if (user === null) {
-                this.textContent = '360 Connect';
-                imgNode.src = this.logoUri();
-            } else {
-                this.textContent = user.surname;
-                if (typeof(user.avatar) !== 'undefined') {
-                    imgNode.src = `${domain}${user.avatar}`;
-                }
-            }
-        }
+    }
+
+    updateContent(advert: any, innerNode: any)
+    {
+        const imgSrc = `http://360medical.dev/${advert.cover_logo}`;
+        const logoSrc = `http://360medical.dev/${advert.cover_image}`;
+
+        innerNode.innerHTML = `<div>
+            <div class="header">
+                <span><img src="${logoSrc}" alt="Logo" width="38" height="38"></span>
+                <span class="author">${advert.author}</span>
+            </div>
+            <div class="cover"><img src="${imgSrc}" alt="Featured image" width="${this.width}"></div>
+            <div class="description">${advert.description}</div>
+        </div>`
+
+        this.contentDOM.style.height = 'auto' // '350px'
     }
 
     onClick(e: any)
@@ -127,54 +87,68 @@ export class LoginButton extends HTMLElement
 
     cssStyles()
     {
+        // // :host > .connect-featured
+        // -moz-transition: height ${this.animSpeed};
+        // -ms-transition: height ${this.animSpeed};
+        // -o-transition: height ${this.animSpeed};
+        // -webkit-transition: height ${this.animSpeed};
+        // transition: height ${this.animSpeed};
+
         return `
             :host {
+                width: ${this.width}px;
                 display: inline-block;
+                position: fixed;
+                bottom: 0px;
+                right: 24px;
             }
 
-            :host > .connect-btn {
-                display: flex;
-                flex-direction: column;
+            :host > .connect-featured {
+                display: block;
+                color: #f9f9f9;
+                font-size: 14px;
+                font-family: Arial, sans-serif;
 
-                cursor: pointer;
-                color: ${this.colors.white};
-                font-size: 16px;
-                line-height: 1em;
-                letter-spacing: .25px;
-                font-family: Helevetica, Arial, sans-serif;
-                background-color: ${this.colors.primary};
+                background-color: #3a3a3a;
+
+                -moz-font-smoothing: antialiased;
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
+                border-radius: 1px 1px 0px 0px;
+                -webkit-border-radius: 1px 1px 0px 0px;
+                -moz-border-radius: 1px 1px 0px 0px;
 
-                border-radius: 2px;
-                -moz-border-radius: 2px;
-                -webkit-border-radius: 2px;
+                height: 0px;
             }
 
-            :host > .connect-btn:hover {
-                background-color: ${this.colors.primaryHover};
-            }
-
-            :host > .connect-btn > .inner {
+            :host .header {
                 display: flex;
                 flex-direction: row;
                 align-items: center;
-                padding: 6px 12px 6px 6px;
+            }
+            :host .header span {
+                padding: 0px;
+                margin: 0px;
+            }
+            :host .header .author {
+                font-size: 1.1em;
+                font-weight: bold;
+                margin-left: 8px;
             }
 
-            :host > .connect-btn > .inner > span {
-
+            :host .cover img {
+                max-height: 200px;
             }
-            :host > .connect-btn  > .inner > span.logo {
-                background: ${this.colors.white};
-                padding: 3px 3px 1px 3px;
-                border-radius: 2px;
-                -moz-border-radius: 2px;
-                -webkit-border-radius: 2px;
-                margin-right: 8px;
-            }
-            :host > .connect-btn  > .inner > span.text {
 
+            :host .description {
+                line-height: 1.5em;
+                padding: 8px 16px;
+            }
+
+            :host .footer {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
             }
         `;
     }

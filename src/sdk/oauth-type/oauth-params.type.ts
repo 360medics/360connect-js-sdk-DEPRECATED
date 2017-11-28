@@ -5,15 +5,17 @@ export type OAuthClientInitConfig = {
     clientSecret?: string;
     package?: string;
     version?: string;
+    profile_licence?: string;
 };
 
 export type OAuthParameters = {
     redirectUri: string;
-    scope: string;
+    scope?: string;
     state?: string;
     username?: string;
     password?: string;
     grant_type?: 'password'|'client_credentials'|'token'|'authorization_code';
     userApiKey?: string;
+    profile_licence?: string;
     [prop: string]: string|number;
 };
