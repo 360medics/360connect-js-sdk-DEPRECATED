@@ -13,8 +13,7 @@
         const CLIENT_ID = '1_2kazv0v7xrs444kcgss044s080o80w84co8o0coc0cg4ko0okc';
         const CLIENT_SECRET = '6cmwgzlkgx0kg4wkcs4gk0o0owgc80k44cs0cc8g8sgko40ckc';
         const REDIRECT_URI = 'http://360connect-demo.dev/implicit-grant.html';
-        const SCOPE = 'full_scope';
-        
+
         Connect.initialize({
             clientId: CLIENT_ID,
             clientSecret: CLIENT_SECRET,
@@ -36,7 +35,7 @@
             }
         }
 
-        const oauthParams = { state: 'KustomVerifToken', redirectUri: REDIRECT_URI, scope: SCOPE };
+        const oauthParams = { state: 'KustomVerifToken', redirectUri: REDIRECT_URI };
 
         $(function() {
             // show login url for the user
@@ -50,10 +49,18 @@
                 updateUi(false)
             })
 
+            // find and advert and display it
+            if (Connect.OAuth().isLoggedIn()) {
+                Connect.OAuth().getFeaturedContent().then(function (response) {
+                    console.log(response)
+                }).catch(err => {
+                    console.log(err)
+                })
+            }
+
             // configure what happens after successfull login
             Connect.OAuth().afterLogin(function(data) {
                 Connect.OAuth().getLoginStatus(true).then(response => {
-                    console.log(response)
                     if (response.status === "connected") {
                         updateUi(true, response.user)
                     } else {
@@ -94,4 +101,6 @@
             <p><a href="#" id="login-button">Start flow</a></p>
         </div>
     </div>
+
+    <featured-content></featured-content>
 </body>

@@ -1,0 +1,20 @@
+{
+    "dev": {
+        "api": {
+            "PROTOCOL": "http",
+            "DOMAIN": "360medics.dev"
+        }
+    },
+    "staging": {
+        "api": {
+            "PROTOCOL": "https",
+            "DOMAIN": "beta.360medics.com"
+        }
+    },
+    "prod": {
+        "api": {
+            "PROTOCOL": "https",
+            "DOMAIN": "360medics.com"
+        }
+    }
+}

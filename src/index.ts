@@ -1,7 +1,7 @@
 import { Connect, OAuth, OAuthFlows }   from './sdk';
 import { LoginButton }                  from './sdk/dom';
+import { FeaturedContent }              from './sdk/dom';
 
-declare var window: any;
 const connect = new Connect();
 
 // document.addEventListener('DOMContentLoaded', function(e) {
@@ -10,11 +10,8 @@ const connect = new Connect();
 
 // create custom shadow DOM elements
 // customElements.define('x-foo', XFooDOMElement);
-customElements.define('login-button', LoginButton);
-
-window.addEventListener('message', (e) => {
-    connect.OAuth().afterPopup(e);
-})
+// customElements.define('login-button', LoginButton);
+// customElements.define('featured-content', FeaturedContent);
 
 connect.IMPLICIT_FLOW = OAuthFlows.IMPLICIT_FLOW;
 connect.PASSWORD_FLOW = OAuthFlows.PASSWORD_FLOW;

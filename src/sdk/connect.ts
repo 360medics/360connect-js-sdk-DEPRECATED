@@ -2,6 +2,8 @@ import * as mixpanel from 'mixpanel-browser';
 import { OAuth, Config }            from '../sdk';
 import { QueryParams }              from '../sdk/oauth-http';
 import { OAuthClientInitConfig }    from '../sdk/oauth-type';
+import { LoginButton }              from '../sdk/dom';
+import { FeaturedContent }          from '../sdk/dom';
 
 /**
  * Main wrapper 360 connect class.
@@ -25,12 +27,15 @@ export class Connect
     {
         Config.init(clientConfig.environment);
         this.mixpanelConfig = Config.getConfig()['mixpanel'];
-        
+
         this.oauth = new OAuth();
         this.oauth.initialize(clientConfig);
 
         this.package = clientConfig.package || null;
         this.version = clientConfig.version || null;
+
+        let button = customElements.define('login-button', LoginButton);
+        let feature = customElements.define('featured-content', FeaturedContent);
 
         return this;
     }

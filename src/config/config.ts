@@ -1,3 +1,5 @@
+import * as envs from '../config/environment.json';
+
 /**
  * Configuration helper
  */
@@ -33,9 +35,9 @@ export class ConfigModule
         if (environment === 'dev') {
             console.warn(`@360connect: you are using the "dev" environment which is meant to be for local development only. If you are a developer use "staging" instead.`);
         }
-
+        
         this.environment = environment;
-        this.config = require(`../config/environment.${environment}.json`);
+        this.config = envs[environment];
     }
 }
 

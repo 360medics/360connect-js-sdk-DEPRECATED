@@ -9,7 +9,7 @@
     "node": ">=4.3.2"
   },
   "scripts": {
-    "start": "",
+    "start": "npm run watch",
     "build": "webpack",
     "watch": "npm run copy:assets && webpack",
     "copy:assets": "bash build.sh"

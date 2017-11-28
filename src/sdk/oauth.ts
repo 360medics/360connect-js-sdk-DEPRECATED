@@ -1,3 +1,5 @@
+declare var winidow: any;
+declare var document: any;
 import * as mixpanel from 'mixpanel-browser';
 import * as request                 from 'ajax-request';
 import { Connect, Config, Local }   from '../sdk';
@@ -30,14 +32,10 @@ export class OAuth
     public static TOKEN_PATH = ['oauth', 'v2', 'token'];       // rest/oauth/v2/token
     public static LOGIN_PATH = ['oauth', 'v2', 'auth'];
 
-    public static ANON_SCOPE = 'anon_scope';
-    public static REDUCED_SCOPE = 'reduced_scope';
-    public static FULL_SCOPE = 'full_scope';
-    public static DEFAULT_SCOPE = 'anon_scope';
-
     private popup: any = null;
     private onLogin: Function = () => {};
     private userApiKey: string = null;
+    private loginButton: HTMLElement = null;
 
     constructor() {}
 
@@ -46,7 +44,22 @@ export class OAuth
         this.config = Config.getConfig()['api'];
         this.clientConfig = clientConfig;
         this.clientConfig.flow = (typeof this.clientConfig.flow === 'undefined') ? OAuthFlows.AUTHORIZATION_FLOW : this.clientConfig.flow;
+
+        window.addEventListener('message', (e) => {
+            this.afterPopup(e);
+        })
+
+        let buttons = document.getElementsByTagName('login-button');
+        if (buttons.length > 0) {
+            this.loginButton = buttons[0];
+        }
+
         return this;
+    }
+
+    button()
+    {
+        return this.loginButton;
     }
 
     getEnv()
@@ -63,13 +76,11 @@ export class OAuth
      */
     getLoginUrl(params: OAuthParameters = null)
     {
-        // least requirements
-        this.require(['scope']);
-
         // ever needed parameters
         params.is_oauth = 1; // always add a usefull for symfony backend
         params.clientId = this.clientConfig.clientId;
         params.clientSecret = this.clientConfig.clientSecret;
+        params.profile_licence = this.clientConfig.profile_licence || 'anonymous_profile'
 
         // response type varies depending on oauth mode
         if (this.clientConfig.flow === OAuthFlows.AUTHORIZATION_FLOW) {
@@ -161,7 +172,7 @@ export class OAuth
                     this.dispatchStatusChangeEvent('authorized')
                     data.origin = '_360connect';
                     this.afterPopup({ data: data });
-                    window.location.hash = null;
+                    window.location.hash = '';
                 }
 
             } else {
@@ -209,10 +220,38 @@ export class OAuth
         // @todo
     }
 
+    isLoggedIn()
+    {
+        return (null === this.getUser()) ? false : true;
+    }
+
     getUser()
     {
         const data = Local.retrieve('loginStatus');
         return (data === null) ? null : data.user;
+    }
+
+    getFeaturedContent()
+    {
+        const url = this.endpoint(['api', 'carnival', 'department'])
+        const headers = this.authHeaders()
+
+        return new Promise((resolve, reject) => {
+            request({ url: url, method: POST, headers: headers }, (err, res, body) => {
+                const data = JSON.parse(body)
+
+                if (res.statusCode === 200) {
+                    const event = new CustomEvent('content:change', { detail: { advert: data } });
+                    window.dispatchEvent(event);
+                    resolve(data)
+                } else if (res.statusCode === 404) {
+                    resolve(data)
+                } else {
+                    reject(res)
+                }
+
+            })
+        })
     }
 
     getRefreshToken()
@@ -236,7 +275,7 @@ export class OAuth
         params.client_id = this.clientConfig.clientId;
         params.client_secret = this.clientConfig.clientSecret;
 
-        this.require(['scope', 'grant_type']);
+        this.require(['grant_type']);
 
         const url = this.endpoint(OAuth.TOKEN_PATH, params);
 
@@ -268,11 +307,12 @@ export class OAuth
     requestPasswordGrants(params: OAuthParameters): Promise<TokenResponse>
     {
         console.warn(`@360connect: OAuth flow with password grants requests is NOT STABLE yet and should NOT BE USED IN PRODUCTION`)
+
         params.grant_type = 'password';
         params.client_id = this.clientConfig.clientId;
         params.client_secret = this.clientConfig.clientSecret;
 
-        this.require(['username', 'password', 'scope', 'grant_type']);
+        this.require(['username', 'password', 'grant_type']);
 
         const url = this.endpoint(OAuth.TOKEN_PATH, params);
 
@@ -305,7 +345,7 @@ export class OAuth
 
             if (data != null) {
                 // dispatch change on the user, the LoginButton listens to this
-                this.tryToIdentifyProfile(data.user);
+                // this.tryToIdentifyProfile(data.user);
                 return Promise.resolve(new TokenResponse(data, { statusCode: 200 }));
             }
 
@@ -321,7 +361,7 @@ export class OAuth
 
                 if (res.statusCode === 200) {
                     data = JSON.parse(body);
-                    this.tryToIdentifyProfile(data.user);
+                    // this.tryToIdentifyProfile(data.user);
                 } else {
                     // see APi endpoints server side
                     data = { status: 'unkown', user: null };
@@ -366,7 +406,7 @@ export class OAuth
     private configureOAuthParams(params: OAuthParameters)
     {
         if (typeof params === 'undefined') {
-            params = { redirectUri: null, scope: null };
+            params = { redirectUri: null };
         }
 
         for (let key of this.requiredOAuthParams) {
@@ -399,7 +439,7 @@ export class OAuth
     private authHeaders()
     {
         return {
-            'Content-Type': 'application/json; charset=utf-8',
+            'Content-Type': 'application/json;charset=utf-8',
             'Authorization': `Bearer ${this.getAccessToken()}`,
         }
     }
@@ -411,15 +451,16 @@ export class OAuth
         }
     }
 
-    private tryToIdentifyProfile(userData: any)
-    {
-        if (null == userData) { return; }
-
-        // full or reduced scopes
-        if (typeof userData.email !== 'undefined') {
-            mixpanel.identify(userData.email);
-        } else {
-            // anonymous scope, no one to identify oralias
-        }
-    }
+    // @todo
+    // private tryToIdentifyProfile(userData: any)
+    // {
+    //     if (null == userData) { return; }
+    //
+    //     // full or reduced scopes
+    //     if (typeof userData.email !== 'undefined') {
+    //         mixpanel.identify(userData.email);
+    //     } else {
+    //         // anonymous scope, no one to identify or alias
+    //     }
+    // }
 }
