@@ -1,7 +1,7 @@
 {
     "api": {
         "PROTOCOL": "http",
-        "DOMAIN": "360medics.dev"
+        "DOMAIN": "360medics.localhost"
     },
     "mixpanel": {
         "token": "da6b24675562342ee90f37a0a67d0ae4"
