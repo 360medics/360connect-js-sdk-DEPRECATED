@@ -6372,7 +6372,7 @@ module.exports = {
 	"dev": {
 		"api": {
 			"PROTOCOL": "http",
-			"DOMAIN": "360medics.dev"
+			"DOMAIN": "360medics.localhost"
 		}
 	},
 	"staging": {
