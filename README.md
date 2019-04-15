@@ -1,4 +1,4 @@
-# OAuth 360 Connect JS SDK
+# Simple 360 Connect JS SDK
 
 <h1 align="center">
 <img align="center" src="test/docs/login-button-loggedout.png" height="52" alt="360connect login button" style="display:block">
@@ -47,6 +47,15 @@ Show the login button (featuring user status) somewhere in your HTML <img src="t
 
 ```html
 <login-button-v2></login-button-v2>
+```
+
+### Showing the logout button
+
+Show the logout button (featuring user status) somewhere in your HTML.
+
+
+```html
+<logout-button-v2></logout-button-v2>
 ```
 
 ### Checking logged in status
