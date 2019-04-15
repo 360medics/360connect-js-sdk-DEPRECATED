@@ -5,7 +5,7 @@ module.exports = {
     output: {
         filename: 'dist/360connect-js-sdk.bundle.js',
         libraryTarget: 'var',
-        library: 'Connect',
+        library: 'SimpleConnect',
     },
     resolve: {
         // Add '.ts' and '.tsx' as a resolvable extension.
