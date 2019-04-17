@@ -6404,15 +6404,17 @@ class SimpleConnect {
         this.deleteCookie(this.cookieToken);
     }
     displayButtonLogout() {
-        this.user = new User_1.User();
-        customElements.define('logout-button-v2', LogoutButton_1.LogoutButtonV2);
-        var self = this;
-        document
-            .getElementsByTagName('logout-button-v2')
-            .item(0)
-            .addEventListener('click', function () {
-            self.deleteToken();
-        }, false);
+        if (document.getElementsByTagName('logout-button-v2').length > 0) {
+            this.user = new User_1.User();
+            customElements.define('logout-button-v2', LogoutButton_1.LogoutButtonV2);
+            var self = this;
+            document
+                .getElementsByTagName('logout-button-v2')
+                .item(0)
+                .addEventListener('click', function () {
+                self.deleteToken();
+            }, false);
+        }
     }
     openConnection() {
         window.location.href = this.params.url + '/connect/autorization_form?clientId=' + this.params.idClient;
@@ -6431,12 +6433,13 @@ class SimpleConnect {
                 }
                 if (res.statusCode === 200) {
                     this.user = Object.assign(new User_1.User(), JSON.parse(JSON.parse(body)));
-                    var event = new CustomEvent('has-data-user', { 'detail': 'Yo brot' });
+                    var event = new CustomEvent('has-data-user', { 'detail': this.user });
                     document.getElementsByTagName('login-button-v2').item(0).dispatchEvent(event);
                     this.displayButtonLogout();
                 }
                 else {
                     reject(res);
+                    this.displayButtonLogin();
                 }
             });
         });
@@ -6447,7 +6450,7 @@ class SimpleConnect {
                 url: this.params.url + '/connect/user/delete-token?clientId=' + this.params.idClient + '&token=' + this.getCookie(this.cookieToken),
                 method: "GET",
                 headers: {
-                    'Content-Type': 'text/plain;charset=utf-8'
+                    'Content-Type': 'text/plain;charset=utf-8',
                 }
             }, (err, res, body) => {
                 if (typeof err !== 'undefined' && err !== null) {
@@ -6466,26 +6469,34 @@ class SimpleConnect {
         });
     }
     setCookie(name, val) {
-        const date = new Date();
+        /*const date = new Date();
         const value = val;
+
         // Set it expire in 7 days
         date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+
         // Set it
-        document.cookie = name + "=" + value + "; expires=" + date.toUTCString() + "; path=/";
+        document.cookie = name + "=" + value + "; expires=" + date.toUTCString() + "; path=/";*/
+        localStorage.setItem(name, val);
     }
     getCookie(name) {
-        const value = "; " + document.cookie;
+        return localStorage.getItem(name);
+        /*const value = "; " + document.cookie;
         const parts = value.split("; " + name + "=");
+
         if (parts.length == 2) {
             return parts.pop().split(";").shift();
-        }
+        }*/
     }
     deleteCookie(name) {
-        const date = new Date();
+        /*const date = new Date();
+
         // Set it expire in -1 days
         date.setTime(date.getTime() + (-1 * 24 * 60 * 60 * 1000));
+
         // Set it
-        document.cookie = name + "=; expires=" + date.toUTCString() + "; path=/";
+        document.cookie = name + "=; expires=" + date.toUTCString() + "; path=/";*/
+        localStorage.removeItem(name);
     }
 }
 exports.SimpleConnect = SimpleConnect;

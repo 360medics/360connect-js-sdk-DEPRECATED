@@ -51,16 +51,19 @@ export class SimpleConnect {
     }
 
     private displayButtonLogout() {
-        this.user = new User();
-        customElements.define('logout-button-v2', LogoutButtonV2);
+        if (document.getElementsByTagName('logout-button-v2').length > 0) {
 
-        var self = this;
-        document
-            .getElementsByTagName('logout-button-v2')
-            .item(0)
-            .addEventListener('click', function () {
-                self.deleteToken();
-            }, false);
+            this.user = new User();
+            customElements.define('logout-button-v2', LogoutButtonV2);
+
+            var self = this;
+            document
+                .getElementsByTagName('logout-button-v2')
+                .item(0)
+                .addEventListener('click', function () {
+                    self.deleteToken();
+                }, false);
+        }
     }
 
     private openConnection() {
@@ -76,16 +79,17 @@ export class SimpleConnect {
                     'Content-Type': 'text/plain;charset=utf-8'
                 }
             }, (err, res, body) => {
-                if(typeof err !== 'undefined' && err !== null) {
+                if (typeof err !== 'undefined' && err !== null) {
                     throw new Error('Une erreur est arrivée. Contactez un de nos administrateurs.');
                 }
                 if (res.statusCode === 200) {
                     this.user = Object.assign(new User(), JSON.parse(JSON.parse(body)));
-                    var event = new CustomEvent('has-data-user', {'detail': 'Yo brot'});
+                    var event = new CustomEvent('has-data-user', {'detail': this.user});
                     document.getElementsByTagName('login-button-v2').item(0).dispatchEvent(event);
                     this.displayButtonLogout();
                 } else {
                     reject(res);
+                    this.displayButtonLogin();
                 }
             })
         });
@@ -97,10 +101,10 @@ export class SimpleConnect {
                 url: this.params.url + '/connect/user/delete-token?clientId=' + this.params.idClient + '&token=' + this.getCookie(this.cookieToken),
                 method: "GET",
                 headers: {
-                    'Content-Type': 'text/plain;charset=utf-8'
+                    'Content-Type': 'text/plain;charset=utf-8',
                 }
             }, (err, res, body) => {
-                if(typeof err !== 'undefined' && err !== null) {
+                if (typeof err !== 'undefined' && err !== null) {
                     throw new Error('Une erreur est arrivée. Contactez un de nos administrateurs.');
                 }
                 if (res.statusCode === 204) {
@@ -116,33 +120,38 @@ export class SimpleConnect {
     }
 
     private setCookie(name: string, val: string) {
-        const date = new Date();
+        /*const date = new Date();
         const value = val;
 
         // Set it expire in 7 days
         date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
 
         // Set it
-        document.cookie = name + "=" + value + "; expires=" + date.toUTCString() + "; path=/";
+        document.cookie = name + "=" + value + "; expires=" + date.toUTCString() + "; path=/";*/
+        localStorage.setItem(name, val);
     }
 
     private getCookie(name: string) {
-        const value = "; " + document.cookie;
+
+        return localStorage.getItem(name);
+
+        /*const value = "; " + document.cookie;
         const parts = value.split("; " + name + "=");
 
         if (parts.length == 2) {
             return parts.pop().split(";").shift();
-        }
+        }*/
     }
 
     private deleteCookie(name: string) {
-        const date = new Date();
+        /*const date = new Date();
 
         // Set it expire in -1 days
         date.setTime(date.getTime() + (-1 * 24 * 60 * 60 * 1000));
 
         // Set it
-        document.cookie = name + "=; expires=" + date.toUTCString() + "; path=/";
+        document.cookie = name + "=; expires=" + date.toUTCString() + "; path=/";*/
+        localStorage.removeItem(name);
     }
 
 }
