@@ -1,4 +1,4 @@
-export class LoginButtonV2 extends HTMLElement{
+export class LoginButton extends HTMLElement{
 
 
     private colors: any = {

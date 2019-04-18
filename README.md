@@ -1,13 +1,13 @@
-# Simple 360 Connect JS SDK
+# 360 Connect JS SDK
 
 <h1 align="center">
 <img align="center" src="test/docs/login-button-loggedout.png" height="52" alt="360connect login button" style="display:block">
-Simple 360 Connect JS SDK
+360 Connect JS SDK
 </h1>
 
 ## Getting started on the web
 
-Import the SDK js bundle into your HTML page (see also example in `indexV2.html`).
+Import the SDK js bundle into your HTML page (see also example in `index.html`).
 
 ```html
 <!doctype html>
@@ -31,11 +31,11 @@ See also (notes about security in single page applications)[#security].
 
 ```javascript
 const ENV = 'staging';
-const CLIENT_ID = '<MY_CLIENT_ID>';
+const CLIENT_KEY = '<MY_CLIENT_KEY>';
 
 // initialize the SDK
-SimpleConnect.init({
-    idClient : CLIENT_ID,
+Connect.init({
+    clientKey : CLIENT_KEY,
     environnement : ENV
 });
 ```
@@ -46,7 +46,7 @@ Show the login button (featuring user status) somewhere in your HTML <img src="t
 
 
 ```html
-<login-button-v2></login-button-v2>
+<login-button></login-button>
 ```
 
 ### Showing the logout button
@@ -55,21 +55,21 @@ Show the logout button (featuring user status) somewhere in your HTML.
 
 
 ```html
-<logout-button-v2></logout-button-v2>
+<logout-button></logout-button>
 ```
 
 ### Checking logged in status
 Subscribe to event 'has-data-user' to know if your user is connected
 ```javascript
-document.getElementsByTagName('login-button-v2').item(0).addEventListener('has-data-user', function (e) {
+document.getElementsByTagName('login-button').item(0).addEventListener('has-data-user', function (e) {
    document.getElementById('connected').classList.remove('hidden');
    document.getElementById('no-connected').classList.add('hidden');
-   document.getElementById('name-user').innerText = SimpleConnect.user.toString();
+   document.getElementById('name-user').innerText = Connect.user.toString();
 });
 ```
 Subscribe to event 'has-logout' to know when your user is disconnected
 ```javascript
-document.getElementsByTagName('logout-button-v2').item(0).addEventListener('has-logout', function (e) {
+document.getElementsByTagName('logout-button').item(0).addEventListener('has-logout', function (e) {
     document.getElementById('no-connected').classList.remove('hidden');
     document.getElementById('connected').classList.add('hidden');
     document.getElementById('name-user').innerText = '';

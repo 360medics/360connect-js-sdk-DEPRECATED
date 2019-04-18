@@ -1,21 +1,21 @@
-import {ConfigSimpleConnect} from "./ConfigSimpleConnect";
+import {ConfigConnect} from "./ConfigConnect";
 import {User} from "./User";
-import {LoginButtonV2} from "./LoginButton";
+import {LoginButton} from "./LoginButton";
 import * as request from 'ajax-request';
-import {LogoutButtonV2} from "./LogoutButton";
+import {LogoutButton} from "./LogoutButton";
 
-export class SimpleConnect {
-
-    private params: ConfigSimpleConnect;
-
-    private cookieToken = '360ConnectToken';
+export class Connect
+{
 
     public user: User;
+    private params: ConfigConnect;
+    private cookieToken = '360ConnectToken';
 
-    init(params: any) {
-        this.params = new ConfigSimpleConnect(params);
+    init(params: any)
+    {
+        this.params = new ConfigConnect(params);
         this.params.validate();
-        
+
         //Déjà connecté et on a les infos de l'utilisateur
         if (!!this.getCookie(this.cookieToken) && !!this.user && this.user.isValid()) {
             this.displayButtonLogout();
@@ -36,13 +36,14 @@ export class SimpleConnect {
         return this;
     }
 
-    private displayButtonLogin() {
+    private displayButtonLogin()
+    {
         this.user = new User();
-        customElements.define('login-button-v2', LoginButtonV2);
+        customElements.define('login-button', LoginButton);
 
         var self = this;
         document
-            .getElementsByTagName('login-button-v2')
+            .getElementsByTagName('login-button')
             .item(0)
             .addEventListener('click', function () {
                 self.openConnection();
@@ -50,15 +51,16 @@ export class SimpleConnect {
         this.deleteCookie(this.cookieToken);
     }
 
-    private displayButtonLogout() {
-        if (document.getElementsByTagName('logout-button-v2').length > 0) {
+    private displayButtonLogout()
+    {
+        if (document.getElementsByTagName('logout-button').length > 0) {
 
             this.user = new User();
-            customElements.define('logout-button-v2', LogoutButtonV2);
+            customElements.define('logout-button', LogoutButton);
 
             var self = this;
             document
-                .getElementsByTagName('logout-button-v2')
+                .getElementsByTagName('logout-button')
                 .item(0)
                 .addEventListener('click', function () {
                     self.deleteToken();
@@ -66,26 +68,28 @@ export class SimpleConnect {
         }
     }
 
-    private openConnection() {
-        window.location.href = this.params.url + '/connect/autorization_form?clientId=' + this.params.idClient;
+    private openConnection()
+    {
+        window.location.href = this.params.getUrl + '/connect/autorization_form?clientKey=' + this.params.getClientKey;
     }
 
-    private getDataUser() {
+    private getDataUser()
+    {
         new Promise((resolve, reject) => {
             request({
-                url: this.params.url + '/connect/user?clientId=' + this.params.idClient + '&token=' + this.getCookie(this.cookieToken),
+                url: this.params.getUrl + '/connect/user?clientKey=' + this.params.getClientKey + '&token=' + this.getCookie(this.cookieToken),
                 method: "GET",
                 headers: {
                     'Content-Type': 'text/plain;charset=utf-8'
                 }
             }, (err, res, body) => {
                 if (typeof err !== 'undefined' && err !== null) {
-                    throw new Error('Une erreur est arrivée. Contactez un de nos administrateurs.');
+                    throw new Error('An error occurred when you get data user. Contact someone from 360 medics.');
                 }
                 if (res.statusCode === 200) {
                     this.user = Object.assign(new User(), JSON.parse(JSON.parse(body)));
                     var event = new CustomEvent('has-data-user', {'detail': this.user});
-                    document.getElementsByTagName('login-button-v2').item(0).dispatchEvent(event);
+                    document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
                     this.displayButtonLogout();
                 } else {
                     reject(res);
@@ -95,17 +99,18 @@ export class SimpleConnect {
         });
     }
 
-    private deleteToken() {
+    private deleteToken()
+    {
         new Promise((resolve, reject) => {
             request({
-                url: this.params.url + '/connect/user/delete-token?clientId=' + this.params.idClient + '&token=' + this.getCookie(this.cookieToken),
+                url: this.params.getUrl + '/connect/user/delete-token?clientKey=' + this.params.getClientKey + '&token=' + this.getCookie(this.cookieToken),
                 method: "GET",
                 headers: {
                     'Content-Type': 'text/plain;charset=utf-8',
                 }
             }, (err, res, body) => {
                 if (typeof err !== 'undefined' && err !== null) {
-                    throw new Error('Une erreur est arrivée. Contactez un de nos administrateurs.');
+                    throw new Error('An error occurred when you delete autorization for an user. Contact someone from 360 medics.');
                 }
                 if (res.statusCode === 204) {
                     //OK
@@ -113,13 +118,14 @@ export class SimpleConnect {
                     reject(res);
                 }
                 var event = new CustomEvent('has-logout', {'detail': 'Yo brot'});
-                document.getElementsByTagName('logout-button-v2').item(0).dispatchEvent(event);
+                document.getElementsByTagName('logout-button').item(0).dispatchEvent(event);
                 this.displayButtonLogin();
             })
         });
     }
 
-    private setCookie(name: string, val: string) {
+    private setCookie(name: string, val: string)
+    {
         /*const date = new Date();
         const value = val;
 
@@ -131,7 +137,8 @@ export class SimpleConnect {
         localStorage.setItem(name, val);
     }
 
-    private getCookie(name: string) {
+    private getCookie(name: string)
+    {
 
         return localStorage.getItem(name);
 
@@ -143,7 +150,8 @@ export class SimpleConnect {
         }*/
     }
 
-    private deleteCookie(name: string) {
+    private deleteCookie(name: string)
+    {
         /*const date = new Date();
 
         // Set it expire in -1 days

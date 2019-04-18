@@ -1,2 +1,2 @@
-export * from './SimpleConnect';
-export * from './ConfigSimpleConnect';
+export * from './Connect';
+export * from './ConfigConnect';
