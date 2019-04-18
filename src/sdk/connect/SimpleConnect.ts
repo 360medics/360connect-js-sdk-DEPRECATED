@@ -14,8 +14,8 @@ export class SimpleConnect {
 
     init(params: any) {
         this.params = new ConfigSimpleConnect(params);
-        this.params.validation();
-
+        this.params.validate();
+        
         //Déjà connecté et on a les infos de l'utilisateur
         if (!!this.getCookie(this.cookieToken) && !!this.user && this.user.isValid()) {
             this.displayButtonLogout();
