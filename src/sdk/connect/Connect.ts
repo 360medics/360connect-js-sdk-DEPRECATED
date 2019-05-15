@@ -13,6 +13,9 @@ export class Connect
 
     init(params: any)
     {
+        var event = new CustomEvent('begin-init-btn-login', {});
+        document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
+
         this.params = new ConfigConnect(params);
         this.params.validate();
 
@@ -49,6 +52,8 @@ export class Connect
                 self.openConnection();
             }, false);
         this.deleteCookie(this.cookieToken);
+        var event = new CustomEvent('btn-login-created', {});
+        document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
     }
 
     private displayButtonLogout()
@@ -92,7 +97,6 @@ export class Connect
                     document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
                     this.displayButtonLogout();
                 } else {
-                    reject(res);
                     this.displayButtonLogin();
                 }
             })

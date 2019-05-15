@@ -32,6 +32,21 @@ See also (notes about security in single page applications)[#security].
 ```javascript
 const ENV = 'staging';
 const CLIENT_KEY = '<MY_CLIENT_KEY>';
+//Create listener if you want catch event about SDK
+document.getElementsByTagName('login-button').item(0).addEventListener('has-data-user', function (e) {
+    //[...]
+});
+
+document.getElementsByTagName('login-button').item(0).addEventListener('has-logout', function (e) {
+    //[...]
+});
+
+document.getElementsByTagName('login-button').item(0).addEventListener('begin-init-btn-login', function (e) {
+    //[...]
+});
+document.getElementsByTagName('login-button').item(0).addEventListener('btn-login-created', function (e) {
+    //[...]
+});
 
 // initialize the SDK
 Connect.init({
@@ -73,5 +88,17 @@ document.getElementsByTagName('logout-button').item(0).addEventListener('has-log
     document.getElementById('no-connected').classList.remove('hidden');
     document.getElementById('connected').classList.add('hidden');
     document.getElementById('name-user').innerText = '';
+});
+```
+Subscribe to event 'begin-init-btn-login' to know when initialize begin. It's use to display a loader for example
+```javascript
+document.getElementsByTagName('login-button').item(0).addEventListener('begin-init-btn-login', function (e) {
+    document.getElementById('loader').classList.remove('hidden');
+});
+```
+Subscribe to event 'btn-login-created' to know when button login is display. It's use to hide a loader for example
+```javascript
+document.getElementsByTagName('login-button').item(0).addEventListener('btn-login-created', function (e) {
+    document.getElementById('loader').classList.add('hidden');
 });
 ```

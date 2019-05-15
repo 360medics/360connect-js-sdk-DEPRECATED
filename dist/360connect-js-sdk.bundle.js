@@ -6361,6 +6361,8 @@ class Connect {
         this.cookieToken = '360ConnectToken';
     }
     init(params) {
+        var event = new CustomEvent('begin-init-btn-login', {});
+        document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
         this.params = new ConfigConnect_1.ConfigConnect(params);
         this.params.validate();
         //Déjà connecté et on a les infos de l'utilisateur
@@ -6395,6 +6397,8 @@ class Connect {
             self.openConnection();
         }, false);
         this.deleteCookie(this.cookieToken);
+        var event = new CustomEvent('btn-login-created', {});
+        document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
     }
     displayButtonLogout() {
         if (document.getElementsByTagName('logout-button').length > 0) {
@@ -6431,7 +6435,6 @@ class Connect {
                     this.displayButtonLogout();
                 }
                 else {
-                    reject(res);
                     this.displayButtonLogin();
                 }
             });
