@@ -97,7 +97,8 @@ export class Connect
                     document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
                     this.displayButtonLogout();
                 } else {
-                    this.displayButtonLogin();
+                    this.deleteCookie(this.cookieToken);
+                    window.location.reload(true);
                 }
             })
         });

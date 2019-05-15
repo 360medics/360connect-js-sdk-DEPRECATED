@@ -6435,7 +6435,8 @@ class Connect {
                     this.displayButtonLogout();
                 }
                 else {
-                    this.displayButtonLogin();
+                    this.deleteCookie(this.cookieToken);
+                    window.location.reload(true);
                 }
             });
         });
