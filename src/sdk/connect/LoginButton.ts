@@ -1,4 +1,5 @@
-export class LoginButton extends HTMLElement{
+export class LoginButton extends HTMLElement
+{
 
 
     private colors: any = {
@@ -7,13 +8,15 @@ export class LoginButton extends HTMLElement{
         primaryHover: '#bd2816'
     };
 
-    constructor() {
+    constructor()
+    {
         super();
         this.designButton();
     }
 
-    private designButton() {
-        const shadowRoot = this.attachShadow({ mode: 'open' });
+    private designButton()
+    {
+        const shadowRoot = this.attachShadow({mode: 'open'});
         shadowRoot.innerHTML = `<style>${this.cssStyles()}</style>
             <div class="connect-btn">
                 <div class="inner">
@@ -50,6 +53,8 @@ export class LoginButton extends HTMLElement{
                 border-radius: 2px;
                 -moz-border-radius: 2px;
                 -webkit-border-radius: 2px;
+                width: fit-content;
+                margin: auto;
             }
 
             :host > .connect-btn:hover {

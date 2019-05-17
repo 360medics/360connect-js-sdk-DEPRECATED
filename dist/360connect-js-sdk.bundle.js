@@ -6595,6 +6595,8 @@ class LoginButton extends HTMLElement {
                 border-radius: 2px;
                 -moz-border-radius: 2px;
                 -webkit-border-radius: 2px;
+                width: fit-content;
+                margin: auto;
             }
 
             :host > .connect-btn:hover {
