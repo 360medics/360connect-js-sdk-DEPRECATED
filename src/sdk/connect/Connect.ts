@@ -92,10 +92,15 @@ export class Connect
                     throw new Error('An error occurred when you get data user. Contact someone from 360 medics.');
                 }
                 if (res.statusCode === 200) {
-                    this.user = Object.assign(new User(), JSON.parse(JSON.parse(body)));
-                    var event = new CustomEvent('has-data-user', {'detail': this.user});
-                    document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
-                    this.displayButtonLogout();
+                    try {
+                        this.user = Object.assign(new User(), JSON.parse(JSON.parse(body)));
+                        var event = new CustomEvent('has-data-user', {'detail': this.user});
+                        document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
+                        this.displayButtonLogout();
+                    } catch (e) {
+                        this.deleteCookie(this.cookieToken);
+                        window.location.reload(true);
+                    }
                 } else {
                     this.deleteCookie(this.cookieToken);
                     window.location.reload(true);
