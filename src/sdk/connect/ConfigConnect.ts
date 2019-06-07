@@ -6,11 +6,14 @@ export class ConfigConnect
 
     private environnement: string;
 
+    private apiKey: string;
+
     private url: string;
 
     constructor(params)
     {
         this.clientKey = params.clientKey;
+        this.apiKey = params.apiKey;
         this.environnement = params.environnement;
 
         if (envs[this.environnement]) {
@@ -47,5 +50,10 @@ export class ConfigConnect
     get getUrl(): string
     {
         return this.url;
+    }
+
+    get getApiKey(): string
+    {
+        return this.apiKey;
     }
 }

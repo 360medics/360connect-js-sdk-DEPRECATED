@@ -16,6 +16,10 @@ export class Connect
         var event = new CustomEvent('begin-init-btn-login', {});
         document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
 
+        if(!!this.getCookie( 'api_key')) {
+            params.apiKey = this.getCookie( 'api_key');
+        }
+
         this.params = new ConfigConnect(params);
         this.params.validate();
 
@@ -75,7 +79,13 @@ export class Connect
 
     private openConnection()
     {
-        window.location.href = this.params.getUrl + '/connect/autorization_form?clientKey=' + this.params.getClientKey;
+        let url = this.params.getUrl + '/connect/autorization_form?clientKey=' + this.params.getClientKey;
+
+        if (!!this.params.getApiKey) {
+            url += '&api_key=' + this.params.getApiKey;
+        }
+
+        window.location.href = url;
     }
 
     private getDataUser()

@@ -2666,6 +2666,7 @@ class ConfigConnect {
     constructor(params) {
         this.clientKey = null;
         this.clientKey = params.clientKey;
+        this.apiKey = params.apiKey;
         this.environnement = params.environnement;
         if (envs[this.environnement]) {
             if (envs[this.environnement].api && envs[this.environnement].api.PROTOCOL && envs[this.environnement].api.DOMAIN) {
@@ -2693,6 +2694,9 @@ class ConfigConnect {
     }
     get getUrl() {
         return this.url;
+    }
+    get getApiKey() {
+        return this.apiKey;
     }
 }
 exports.ConfigConnect = ConfigConnect;
@@ -6363,6 +6367,9 @@ class Connect {
     init(params) {
         var event = new CustomEvent('begin-init-btn-login', {});
         document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
+        if (!!this.getCookie('api_key')) {
+            params.apiKey = this.getCookie('api_key');
+        }
         this.params = new ConfigConnect_1.ConfigConnect(params);
         this.params.validate();
         //Déjà connecté et on a les infos de l'utilisateur
@@ -6414,7 +6421,11 @@ class Connect {
         }
     }
     openConnection() {
-        window.location.href = this.params.getUrl + '/connect/autorization_form?clientKey=' + this.params.getClientKey;
+        let url = this.params.getUrl + '/connect/autorization_form?clientKey=' + this.params.getClientKey;
+        if (!!this.params.getApiKey) {
+            url += '&api_key=' + this.params.getApiKey;
+        }
+        window.location.href = url;
     }
     getDataUser() {
         new Promise((resolve, reject) => {
