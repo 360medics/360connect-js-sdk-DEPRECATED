@@ -1,10 +1,10 @@
-export class LoginButtonV2 extends HTMLElement{
+export class LogoutButton extends HTMLElement{
 
 
     private colors: any = {
         white: '#f1f1f1',
-        primary: '#CC2B18',
-        primaryHover: '#bd2816'
+        primary: '#2169cc',
+        primaryHover: '#16bd51'
     };
 
     constructor() {
@@ -20,7 +20,7 @@ export class LoginButtonV2 extends HTMLElement{
                     <span class="logo">
                         <img src="${this.logoUri()}" height="23" width="23" />
                     </span>
-                <span class="text"><slot>360 Connect</slot></span>
+                <span class="text"><slot>Disconnect</slot></span>
                 </div>
             </div>
         `;

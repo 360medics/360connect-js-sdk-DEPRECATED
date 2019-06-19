@@ -17,28 +17,28 @@
         <div id="no-connected">
             Salut, tu veux accéder à nos fonctionnalités ?
             <br /><br />
-            <login-button-v2></login-button-v2>
+            <login-button></login-button>
         </div>
         <div id="connected" class="hidden">
             Hey, ça marche !<br/>
             Bonjour <span id="name-user"></span>
-            <logout-button-v2></logout-button-v2>
+            <logout-button></logout-button>
         </div>
     </body>
     <script type="application/javascript">
 
-        SimpleConnect.init({
-            idClient : '42',
+        Connect.init({
+            clientKey : '42',
             environnement : 'dev'
         });
 
-        document.getElementsByTagName('login-button-v2').item(0).addEventListener('has-data-user', function (e) {
+        document.getElementsByTagName('login-button').item(0).addEventListener('has-data-user', function (e) {
            document.getElementById('connected').classList.remove('hidden');
            document.getElementById('no-connected').classList.add('hidden');
-           document.getElementById('name-user').innerText = SimpleConnect.user.toString();
+           document.getElementById('name-user').innerText = Connect.user.toString();
         });
 
-        document.getElementsByTagName('logout-button-v2').item(0).addEventListener('has-logout', function (e) {
+        document.getElementsByTagName('logout-button').item(0).addEventListener('has-logout', function (e) {
             document.getElementById('no-connected').classList.remove('hidden');
             document.getElementById('connected').classList.add('hidden');
             document.getElementById('name-user').innerText = '';

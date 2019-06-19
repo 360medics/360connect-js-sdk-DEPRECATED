@@ -1,1 +1,1 @@
-export * from './simpleConnect';
+export * from './Connect';
