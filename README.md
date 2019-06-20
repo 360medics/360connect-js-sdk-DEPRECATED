@@ -51,7 +51,8 @@ document.getElementsByTagName('login-button').item(0).addEventListener('btn-logi
 // initialize the SDK
 Connect.init({
     clientKey : CLIENT_KEY,
-    environnement : ENV
+    environnement : ENV,
+    apiKey: USER_API_KEY
 });
 ```
 

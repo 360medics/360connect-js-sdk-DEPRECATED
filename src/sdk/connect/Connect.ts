@@ -11,18 +11,70 @@ export class Connect
     private params: ConfigConnect;
     private cookieToken = '360ConnectToken';
 
+    private _onLogin: any;
+    private _onLogout: any;
+    private _onInit: any;
+    private _onLoginBtnRender: any;
+    private _onLogoutBtnRender: any;
+    private _onError: any;
+
     init(params: any)
     {
-        var event = new CustomEvent('begin-init-btn-login', {});
-        document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
+        this.initFunctions(params);
+        if (!!this.onInit) {
+            this._onInit();
+        }
 
-        if(!!this.getCookie( 'api_key')) {
-            params.apiKey = this.getCookie( 'api_key');
+        if (!!this.getCookie('api_key')) {
+            params.apiKey = this.getCookie('api_key');
         }
 
         this.params = new ConfigConnect(params);
         this.params.validate();
 
+        this.load();
+
+        return this;
+    }
+
+    onInit(fn: Function)
+    {
+        this._onInit = fn;
+        return this;
+    }
+
+    onLogin(fn: Function)
+    {
+        this._onLogin = fn;
+        return this;
+    }
+
+    onLogout(fn: Function)
+    {
+        this._onLogout = fn;
+        return this;
+    }
+
+    onLoginBtnRender(fn: Function)
+    {
+        this._onLoginBtnRender = fn;
+        return this;
+    }
+
+    onLogoutBtnRender(fn: Function)
+    {
+        this._onLogoutBtnRender = fn;
+        return this;
+    }
+
+    onError(fn: Function)
+    {
+        this._onError = fn;
+        return this;
+    }
+
+    private load()
+    {
         //Déjà connecté et on a les infos de l'utilisateur
         if (!!this.getCookie(this.cookieToken) && !!this.user && this.user.isValid()) {
             this.displayButtonLogout();
@@ -39,8 +91,28 @@ export class Connect
                 this.displayButtonLogin();
             }
         }
+    }
 
-        return this;
+    private initFunctions(params: any)
+    {
+        if (!!!this._onInit) {
+            this._onInit = params.onInit;
+        }
+        if (!!!this._onLogin) {
+            this._onLogin = params.onLogin;
+        }
+        if (!!!this._onLogout) {
+            this._onLogout = params.onLogout;
+        }
+        if (!!!this._onLoginBtnRender) {
+            this._onLoginBtnRender = params.onLoginBtnRender;
+        }
+        if (!!!this._onLogoutBtnRender) {
+            this._onLogoutBtnRender = params.onLogoutBtnRender;
+        }
+        if (!!!this._onError) {
+            this._onError = params.onError;
+        }
     }
 
     private displayButtonLogin()
@@ -56,8 +128,10 @@ export class Connect
                 self.openConnection();
             }, false);
         this.deleteCookie(this.cookieToken);
-        var event = new CustomEvent('btn-login-created', {});
-        document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
+
+        if (!!this._onLoginBtnRender) {
+            this._onLoginBtnRender();
+        }
     }
 
     private displayButtonLogout()
@@ -74,6 +148,10 @@ export class Connect
                 .addEventListener('click', function () {
                     self.deleteToken();
                 }, false);
+
+            if (!!this._onLogoutBtnRender) {
+                this._onLogoutBtnRender();
+            }
         }
     }
 
@@ -104,15 +182,24 @@ export class Connect
                 if (res.statusCode === 200) {
                     try {
                         this.user = Object.assign(new User(), JSON.parse(JSON.parse(body)));
-                        var event = new CustomEvent('has-data-user', {'detail': this.user});
-                        document.getElementsByTagName('login-button').item(0).dispatchEvent(event);
+                        if (!!this._onLogin) {
+                            this._onLogin(this.user);
+                        }
                         this.displayButtonLogout();
                     } catch (e) {
+                        if (!!this._onError) {
+                            this._onError(e);
+                        }
                         this.deleteCookie(this.cookieToken);
+                        window.location.href = window.location.href.split("?")[0];
                         window.location.reload(true);
                     }
                 } else {
+                    if (!!this._onError) {
+                        this._onError(res);
+                    }
                     this.deleteCookie(this.cookieToken);
+                    window.location.href = window.location.href.split("?")[0];
                     window.location.reload(true);
                 }
             })
@@ -133,12 +220,15 @@ export class Connect
                     throw new Error('An error occurred when you delete autorization for an user. Contact someone from 360 medics.');
                 }
                 if (res.statusCode === 204) {
-                    //OK
+                    if (!!this._onLogout) {
+                        this._onLogout();
+                    }
                 } else {
                     reject(res);
+                    if (!!this._onError) {
+                        this._onError(res);
+                    }
                 }
-                var event = new CustomEvent('has-logout', {'detail': 'Yo brot'});
-                document.getElementsByTagName('logout-button').item(0).dispatchEvent(event);
                 this.displayButtonLogin();
             })
         });
@@ -146,39 +236,16 @@ export class Connect
 
     private setCookie(name: string, val: string)
     {
-        /*const date = new Date();
-        const value = val;
-
-        // Set it expire in 7 days
-        date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
-
-        // Set it
-        document.cookie = name + "=" + value + "; expires=" + date.toUTCString() + "; path=/";*/
         localStorage.setItem(name, val);
     }
 
     private getCookie(name: string)
     {
-
         return localStorage.getItem(name);
-
-        /*const value = "; " + document.cookie;
-        const parts = value.split("; " + name + "=");
-
-        if (parts.length == 2) {
-            return parts.pop().split(";").shift();
-        }*/
     }
 
     private deleteCookie(name: string)
     {
-        /*const date = new Date();
-
-        // Set it expire in -1 days
-        date.setTime(date.getTime() + (-1 * 24 * 60 * 60 * 1000));
-
-        // Set it
-        document.cookie = name + "=; expires=" + date.toUTCString() + "; path=/";*/
         localStorage.removeItem(name);
     }
 
