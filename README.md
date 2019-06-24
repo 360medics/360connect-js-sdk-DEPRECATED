@@ -90,3 +90,14 @@ Show the logout button (featuring user status) somewhere in your HTML.
 ```html
 <logout-button></logout-button>
 ```
+
+# Configuration de la base de données 360
+## Ajout d'une ligne dans la table *auth_client*
+- name : *Nom du client*
+- key_client: *Clé du client à fournir permettant au script de valider la requête*
+- redirect_url : *URL cible du client après la connexion de l'utilisateur*
+- domain_url : *Domaine du client d'où provient la requête de connexion* (ex. beta.360medics.com)
+- logo_client : *image encodée en base 64 qui sera affiché sur la page de choix d'anonymisation pour l'utilisateur*
+- description_client : *Texte customisé par le client qui est affiché à l'utilisateur sur la page du choix d'anonymisation*
+- custom_user_info : *Fonction PHP (ou accesseur) pour récupérer les données de l'Utilisateur ; Ce champ permet de by-passer le formulaire d'anonymisation*
+
