@@ -6366,7 +6366,7 @@ class Connect {
     }
     init(params) {
         this.initFunctions(params);
-        if (!!this.onInit) {
+        if (!!this._onInit) {
             this._onInit();
         }
         if (!!this.getCookie('api_key')) {
