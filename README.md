@@ -25,7 +25,9 @@ Import the SDK js bundle into your HTML page (see also example in `index.html`).
 
 ### Configuration
 
-Configure the SDK with your API keys and client credentials. Choose `ENV=staging` for the sandbox (`beta.360medical.com`).
+Configure the SDK with your API keys and client credentials. 
+<br />
+Choose `ENV=staging` for the sandbox (`beta.360medical.com`) or `ENV=prod` for (`360medical.com`)  or `ENV=dev` for (`360medical.localhost`) 
 
 See also (notes about security in single page applications)[#security].
 
@@ -33,7 +35,7 @@ See also (notes about security in single page applications)[#security].
 #### Initialization and Callback 
  
 ```javascript
-const ENV = 'staging';
+const ENV = 'dev|staging|prod';
 const CLIENT_KEY = '<MY_CLIENT_KEY>';
 const USER_API_KEY = '<USER_API_KEY>';
 //Send callback for each event (by setter or in params)
