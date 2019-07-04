@@ -27,21 +27,21 @@
     </body>
     <script type="application/javascript">
 
-        Connect.init({
-            clientKey : '42',
-            environnement : 'dev'
+        Connect.onLogin(function (user) {
+            document.getElementById('connected').classList.remove('hidden');
+            document.getElementById('no-connected').classList.add('hidden');
+            document.getElementById('name-user').innerText = user.toString();
         });
 
-        document.getElementsByTagName('login-button').item(0).addEventListener('has-data-user', function (e) {
-           document.getElementById('connected').classList.remove('hidden');
-           document.getElementById('no-connected').classList.add('hidden');
-           document.getElementById('name-user').innerText = Connect.user.toString();
-        });
-
-        document.getElementsByTagName('logout-button').item(0).addEventListener('has-logout', function (e) {
+        Connect.onLogin(function () {
             document.getElementById('no-connected').classList.remove('hidden');
             document.getElementById('connected').classList.add('hidden');
             document.getElementById('name-user').innerText = '';
+        });
+
+        Connect.init({
+            clientKey : '42',
+            environnement : 'dev'
         });
 
     </script>

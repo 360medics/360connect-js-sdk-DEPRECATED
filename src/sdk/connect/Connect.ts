@@ -21,7 +21,7 @@ export class Connect
     init(params: any)
     {
         this.initFunctions(params);
-        if (!!this.onInit) {
+        if (!!this._onInit) {
             this._onInit();
         }
 
