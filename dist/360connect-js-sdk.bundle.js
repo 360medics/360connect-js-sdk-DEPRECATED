@@ -6494,7 +6494,11 @@ class Connect {
                 }
                 if (res.statusCode === 200) {
                     try {
-                        this.user = Object.assign(new User_1.User(), JSON.parse(JSON.parse(body)));
+                        var userTpm = JSON.parse(body);
+                        if (typeof userTpm != 'object') {
+                            userTpm = JSON.parse(userTpm);
+                        }
+                        this.user = Object.assign(new User_1.User(), userTpm);
                         if (!!this._onLogin) {
                             this._onLogin(this.user);
                         }
